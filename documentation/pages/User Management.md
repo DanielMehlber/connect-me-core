@@ -1,0 +1,7 @@
+- User Management includes User CRUD operations
+	- [[Registration Process]]
+	- [[Login Process]]
+	- [[Account Update Process]]
+	- [[Account Deletion Process]]
+- User Management is implemented inside the `userManagement` package.
+- The `UserLogic` interface allows access to this package and its operations
