@@ -1,15 +1,15 @@
 package org.connectme.core.userManagement;
 
 import org.connectme.core.exceptions.InternalErrorException;
-import org.connectme.core.userManagement.entities.Registration;
+import org.connectme.core.userManagement.entities.RegistrationProcess;
 import org.connectme.core.userManagement.entities.User;
 import org.connectme.core.userManagement.exceptions.NoSuchUserException;
 import org.connectme.core.userManagement.exceptions.UsernameAlreadyTakenException;
 
 /**
- * This interface defines all actions considered user management
+ * This interface defines all actions considered user management that need to be accessed by APIs or components
  */
-public interface UserLogic {
+public interface UserManagement {
 
 
     /**
@@ -41,7 +41,7 @@ public interface UserLogic {
      * @throws InternalErrorException possible internal errors e.g. because of database connection
      * @throws UsernameAlreadyTakenException user with this username cannot be created, username is not available
      */
-    void createNewUser(final Registration userdata) throws RuntimeException, InternalErrorException, UsernameAlreadyTakenException;
+    void createNewUser(final RegistrationProcess userdata) throws RuntimeException, InternalErrorException, UsernameAlreadyTakenException;
 
     /**
      * Update user data
@@ -60,6 +60,4 @@ public interface UserLogic {
      * @throws NoSuchUserException no such user with passed username
      */
     void deleteUser(final String username) throws RuntimeException, InternalErrorException, NoSuchUserException;
-
-
 }

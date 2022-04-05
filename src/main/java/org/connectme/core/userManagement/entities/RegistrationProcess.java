@@ -17,7 +17,7 @@ import java.util.Random;
  *
  * @author Daniel Mehlber
  */
-public class Registration {
+public class RegistrationProcess {
 
     public static final int MAX_AMOUNT_VERIFICATION_ATTEMPTS = 3;
     public static final int BLOCK_FAILED_ATTEMPT_MINUTES = 5;
@@ -47,13 +47,13 @@ public class Registration {
      * The registration process has multiple steps along which the client updates the instances state
      * e.g. before and after phone number verification
      */
-    private RegistrationState state;
+    private RegistrationProcessState state;
 
     /**
      * Creates new Registration and sets state accordingly
      * @author Daniel Mehlber
      */
-    public Registration() {
+    public RegistrationProcess() {
         reset();
     }
 
@@ -69,13 +69,13 @@ public class Registration {
      * @author Daniel Mehlber
      */
     public void setUsernameAndPassword(final String username, final String password) throws IllegalStateException {
-        if(state != RegistrationState.CREATED)
+        if(state != RegistrationProcessState.CREATED)
             throw new IllegalStateException(
                     String.format("registration is in state %s and cannot accept username/password", state.name()));
         else {
             this.username = username;
             this.password = password;
-            state = RegistrationState.USERNAME_PASSWORD_SET;
+            state = RegistrationProcessState.USERNAME_PASSWORD_SET;
         }
     }
 
@@ -90,12 +90,12 @@ public class Registration {
      * @author Daniel Mehlber
      */
     public void setPhoneNumber(final String phoneNumber) throws IllegalStateException {
-        if (state != RegistrationState.USERNAME_PASSWORD_SET)
+        if (state != RegistrationProcessState.USERNAME_PASSWORD_SET)
             throw new IllegalStateException(
                     String.format("registration is in state %s and cannot accept phone number", state.name()));
         else {
             this.phoneNumber = phoneNumber;
-            state = RegistrationState.PHONE_NUMBER_SET;
+            state = RegistrationProcessState.PHONE_NUMBER_SET;
         }
     }
 
@@ -113,7 +113,7 @@ public class Registration {
      * @author Daniel Mehlber
      */
     public void startAndWaitForVerification() throws IllegalStateException, RegistrationVerificationNowAllowedException {
-        if (state != RegistrationState.PHONE_NUMBER_SET)
+        if (state != RegistrationProcessState.PHONE_NUMBER_SET)
             throw new IllegalStateException(
                     String.format("registration is in state %s and cannot wait for phone number verification", state.name()));
         else {
@@ -122,7 +122,7 @@ public class Registration {
             if(isVerificationAttemptCurrentlyAllowed()) {
                 // CASE: verification attempt is allowed
                 this.verificationCode = generateVerificationCode();
-                state = RegistrationState.WAITING_FOR_PHONE_NUMBER_VERIFICATION;
+                state = RegistrationProcessState.WAITING_FOR_PHONE_NUMBER_VERIFICATION;
             } else {
                 // CASE: not enough time has passed, prohibit another verification attempt
                 throw new RegistrationVerificationNowAllowedException();
@@ -195,7 +195,7 @@ public class Registration {
      * @author Daniel Mehlber
      */
     public void checkVerificationCode(final String passedVerificationCode) throws IllegalStateException, WrongVerificationCodeException {
-        if(state != RegistrationState.WAITING_FOR_PHONE_NUMBER_VERIFICATION)
+        if(state != RegistrationProcessState.WAITING_FOR_PHONE_NUMBER_VERIFICATION)
             throw new IllegalStateException(
                     String.format("registration is in state %s and cannot accept verification codes", state.name()));
         else {
@@ -207,10 +207,10 @@ public class Registration {
             if(verificationCode.equals(passedVerificationCode)) {
                 // CASE: correct verification code has been entered
                 verified = true;
-                state = RegistrationState.PHONE_NUMBER_VERIFIED;
+                state = RegistrationProcessState.PHONE_NUMBER_VERIFIED;
             } else {
                 // CASE: wrong verification code, user must reenter verification process
-                state = RegistrationState.PHONE_NUMBER_SET;
+                state = RegistrationProcessState.PHONE_NUMBER_SET;
                 throw new WrongVerificationCodeException(passedVerificationCode);
             }
         }
@@ -231,7 +231,7 @@ public class Registration {
         if(isResetAllowed()) {
             verificationAttempts = 0;
             lastVerificationAttempt = null;
-            state = RegistrationState.CREATED;
+            state = RegistrationProcessState.CREATED;
             verified = false;
             phoneNumber = null;
             username = null;
@@ -262,7 +262,7 @@ public class Registration {
         return verified;
     }
 
-    public RegistrationState getState() {
+    public RegistrationProcessState getState() {
         return state;
     }
 
