@@ -1,0 +1,19 @@
+- # Regeln und Manifest
+	- Die Entwicklung der App basiert auf den folgenden Grundsätzen
+	- ## 1. Flawless Code
+		- Wir schreiben Code, auf den Audi, BMW, Tinder & co nur neidisch sein können
+		- Zu hohe Vorsätze? Nein gar nicht! Schlampiger Code führt v.a. bei den genannten Konzernen zu sehr hohen Kosten. Ziel eines Startups ist es, die Dinge anders (und damit besser) zu machen, als die alten Riesen in der Wirtschaft.
+		- Wie wir das erreichen? Mit einem Auge für (logisch und optisch) schönen Code, den wir bei der Review immer aus der Perspektive unserer _Flawless Policy_ betrachten. _Schnell zusammen-gehackter_ Code wird hierbei herausfiltert und passt nicht ins Konzept
+	- ## 2. Testing, Testing, Testing
+		- Wir bauen auf **Test-Driven-Development** mit Unit und Intergration Tests, die garantieren, dass der Code immer solide und funktionstüchtig ist.
+		- Tests garantieren jedem Entwickler, dass seine Änderungen am Code keine Funktions- oder Sicherlücken hinterlassen haben und sind dadurch unvermeidbar.
+	- ## 3. Bombenfest
+		- Unser Code und unsere Prozesse müssen funktionell und sicherheits-technisch bombenfest sein, also gegen tollpatschige und böse Benutzer gerüstet sein.
+		- Denke daher immer beim Design einer Routine/Prozess/Funktion nach, wie man sie ausnutzen könnte => Oder in kurz: Unsere Nutzer können dumm und böse sein.
+	- ## 4. Mehrpersonen-Code
+		- Die Entwicklung findet (meistens) im Mehr-Personen-Betrieb statt. Das Bedeutet, dass neue Programmierer jederzeit hinzukommen können, **die den Code ohne Mühe verstehen wollen**.
+		- Kommantare, Kommentare, Kommentare => Kommuniziere mit deinen Mit-Programmierern über Kommentare im Code und teile deine Gedanken.
+		- Stell dir vor, du hättest deinen Code nicht selbst geschrieben und müsstest große Änderungen daran vornehmen - Versetze dich in die Schuhe des unwissenden "Neuen":
+			- Du verstehst den Code sofort und kannst direkt beginnen? Super! Der Code ist verständlich.
+			- Du musst dich erst einarbeiten und verstehst nicht wirklich was du vor dir hast? Nicht gut! Du solltest den Code nochmals überarbeiten.
+		-
