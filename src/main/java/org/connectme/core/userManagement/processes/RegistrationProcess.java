@@ -1,7 +1,11 @@
-package org.connectme.core.userManagement.entities;
+package org.connectme.core.userManagement.processes;
 
-import org.connectme.core.exceptions.RegistrationVerificationNowAllowedException;
-import org.connectme.core.exceptions.WrongVerificationCodeException;
+import org.connectme.core.globalExceptions.ForbiddenInteractionException;
+import org.connectme.core.userManagement.exceptions.RegistrationVerificationNowAllowedException;
+import org.connectme.core.userManagement.exceptions.WrongVerificationCodeException;
+import org.connectme.core.userManagement.entities.User;
+import org.springframework.stereotype.Component;
+import org.springframework.web.context.annotation.SessionScope;
 
 import java.time.LocalDateTime;
 import java.util.Random;
@@ -17,6 +21,8 @@ import java.util.Random;
  *
  * @author Daniel Mehlber
  */
+@Component
+@SessionScope
 public class RegistrationProcess {
 
     public static final int MAX_AMOUNT_VERIFICATION_ATTEMPTS = 3;
@@ -54,7 +60,9 @@ public class RegistrationProcess {
      * @author Daniel Mehlber
      */
     public RegistrationProcess() {
-        reset();
+        try {
+            reset();
+        } catch (ForbiddenInteractionException ignored) {}
     }
 
     /**
@@ -65,12 +73,12 @@ public class RegistrationProcess {
      *
      * @param username valid username of user (must be checked before)
      * @param password secure password of user (must be checked before)
-     * @throws IllegalStateException this instance is currently in a different state and awaits different interactions
+     * @throws ForbiddenInteractionException this instance is currently in a different state and awaits different interactions
      * @author Daniel Mehlber
      */
-    public void setUsernameAndPassword(final String username, final String password) throws IllegalStateException {
+    public void setUsernameAndPassword(final String username, final String password) throws ForbiddenInteractionException {
         if(state != RegistrationProcessState.CREATED)
-            throw new IllegalStateException(
+            throw new ForbiddenInteractionException(
                     String.format("registration is in state %s and cannot accept username/password", state.name()));
         else {
             this.username = username;
@@ -86,12 +94,12 @@ public class RegistrationProcess {
      * NEXT STEP: verification code will be generated for verification process
      *
      * @param phoneNumber syntactically correct phone number (not verified yet)
-     * @throws IllegalStateException this instance is currently in a different state and awaits different interactions
+     * @throws ForbiddenInteractionException this instance is currently in a different state and awaits different interactions
      * @author Daniel Mehlber
      */
-    public void setPhoneNumber(final String phoneNumber) throws IllegalStateException {
+    public void setPhoneNumber(final String phoneNumber) throws ForbiddenInteractionException {
         if (state != RegistrationProcessState.USERNAME_PASSWORD_SET)
-            throw new IllegalStateException(
+            throw new ForbiddenInteractionException(
                     String.format("registration is in state %s and cannot accept phone number", state.name()));
         else {
             this.phoneNumber = phoneNumber;
@@ -108,13 +116,13 @@ public class RegistrationProcess {
      *  - previous verification has failed (new attempt)
      * NEXT STEP : user has entered verification code, check it
      *
-     * @throws IllegalStateException this instance is currently in a different state and awaits different interactions
+     * @throws ForbiddenInteractionException this instance is currently in a different state and awaits different interactions
      * @throws RegistrationVerificationNowAllowedException another registration is currently not allowed
      * @author Daniel Mehlber
      */
-    public void startAndWaitForVerification() throws IllegalStateException, RegistrationVerificationNowAllowedException {
+    public void startAndWaitForVerification() throws ForbiddenInteractionException, RegistrationVerificationNowAllowedException {
         if (state != RegistrationProcessState.PHONE_NUMBER_SET)
-            throw new IllegalStateException(
+            throw new ForbiddenInteractionException(
                     String.format("registration is in state %s and cannot wait for phone number verification", state.name()));
         else {
 
@@ -190,13 +198,13 @@ public class RegistrationProcess {
      *  - if incorrect verification code: repeat verification process
      *
      * @param passedVerificationCode verification code that was passed by the user and needs to be checked
-     * @throws IllegalStateException this instance is currently in a different state and awaits different interactions
+     * @throws ForbiddenInteractionException this instance is currently in a different state and awaits different interactions
      * @throws WrongVerificationCodeException wrong verification code passed by user
      * @author Daniel Mehlber
      */
-    public void checkVerificationCode(final String passedVerificationCode) throws IllegalStateException, WrongVerificationCodeException {
+    public void checkVerificationCode(final String passedVerificationCode) throws ForbiddenInteractionException, WrongVerificationCodeException {
         if(state != RegistrationProcessState.WAITING_FOR_PHONE_NUMBER_VERIFICATION)
-            throw new IllegalStateException(
+            throw new ForbiddenInteractionException(
                     String.format("registration is in state %s and cannot accept verification codes", state.name()));
         else {
 
@@ -224,10 +232,10 @@ public class RegistrationProcess {
      * a registration object stored in session. In certain states a reset is not allowed at the present moment
      * (e.g. too many failed verification attempts: the user must wait a certain amount of time)
      *
-     * @throws IllegalStateException cannot reset registration object right now.
+     * @throws ForbiddenInteractionException cannot reset registration object right now.
      * @author Daniel Mehlber
      */
-    public void reset() throws IllegalStateException {
+    public void reset() throws ForbiddenInteractionException {
         if(isResetAllowed()) {
             verificationAttempts = 0;
             lastVerificationAttempt = null;
@@ -238,7 +246,7 @@ public class RegistrationProcess {
             password = null;
             verificationCode = null;
         } else {
-            throw new IllegalStateException("a reset is currently not allowed/blocked");
+            throw new ForbiddenInteractionException("a reset is currently not allowed/blocked");
         }
     }
 

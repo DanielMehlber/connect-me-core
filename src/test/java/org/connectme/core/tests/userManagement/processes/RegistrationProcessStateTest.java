@@ -1,9 +1,10 @@
-package org.connectme.core.tests.userManagement.entities;
+package org.connectme.core.tests.userManagement.processes;
 
-import org.connectme.core.exceptions.RegistrationVerificationNowAllowedException;
-import org.connectme.core.exceptions.WrongVerificationCodeException;
-import org.connectme.core.userManagement.entities.RegistrationProcess;
-import org.connectme.core.userManagement.entities.RegistrationProcessState;
+import org.connectme.core.globalExceptions.ForbiddenInteractionException;
+import org.connectme.core.userManagement.exceptions.RegistrationVerificationNowAllowedException;
+import org.connectme.core.userManagement.exceptions.WrongVerificationCodeException;
+import org.connectme.core.userManagement.processes.RegistrationProcess;
+import org.connectme.core.userManagement.processes.RegistrationProcessState;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.Test;
 
@@ -12,7 +13,7 @@ import java.time.LocalDateTime;
 public class RegistrationProcessStateTest {
 
     @Test
-    public void happyPath() throws RegistrationVerificationNowAllowedException, WrongVerificationCodeException {
+    public void happyPath() throws RegistrationVerificationNowAllowedException, WrongVerificationCodeException, ForbiddenInteractionException {
         /*
          * SCENARIO: go through happy path of registration process
          */
@@ -40,7 +41,7 @@ public class RegistrationProcessStateTest {
     }
 
     @Test
-    public void exceedVerificationLimit() throws RegistrationVerificationNowAllowedException, WrongVerificationCodeException {
+    public void exceedVerificationLimit() throws RegistrationVerificationNowAllowedException, WrongVerificationCodeException, ForbiddenInteractionException {
         /*
          * SCENARIO: evil or clumsy user enters wrong verification code too often and has to wait for a certain amount
          * of time. The amount of verification attempts per time has to be limited because SMS costs money.
@@ -74,7 +75,7 @@ public class RegistrationProcessStateTest {
     }
 
     @Test
-    public void attemptProcessRestartWhileVerificationBlock() throws RegistrationVerificationNowAllowedException {
+    public void attemptProcessRestartWhileVerificationBlock() throws RegistrationVerificationNowAllowedException, ForbiddenInteractionException {
         /*
          * SCENARIO: evil user tries to send infinite verification SMS in order to harm us:
          * After he attempted too many verifications he must wait. To bypass that, he tries to reset the
@@ -100,11 +101,11 @@ public class RegistrationProcessStateTest {
         Assertions.assertThrows(RegistrationVerificationNowAllowedException.class, registrationProcess::startAndWaitForVerification);
 
         // try to reset registration in order to illegally bypass blocked time. Must be interrupted by exception.
-        Assertions.assertThrows(IllegalStateException.class, registrationProcess::reset);
+        Assertions.assertThrows(ForbiddenInteractionException.class, registrationProcess::reset);
     }
 
     @Test
-    public void attemptIllegalInteractionsToStates() throws WrongVerificationCodeException, RegistrationVerificationNowAllowedException {
+    public void attemptIllegalInteractionsToStates() throws WrongVerificationCodeException, RegistrationVerificationNowAllowedException, ForbiddenInteractionException {
         /*
          * SCENARIO: In every state of the registration only certain interactions are allowed.
          *
@@ -113,33 +114,33 @@ public class RegistrationProcessStateTest {
 
         // Set state to CREATED, following interactions are not allowed:
         RegistrationProcess registrationProcess = new RegistrationProcess();
-        Assertions.assertThrows(IllegalStateException.class, registrationProcess::startAndWaitForVerification);
-        Assertions.assertThrows(IllegalStateException.class, () -> registrationProcess.setPhoneNumber(""));
-        Assertions.assertThrows(IllegalStateException.class, () -> registrationProcess.checkVerificationCode(""));
+        Assertions.assertThrows(ForbiddenInteractionException.class, registrationProcess::startAndWaitForVerification);
+        Assertions.assertThrows(ForbiddenInteractionException.class, () -> registrationProcess.setPhoneNumber(""));
+        Assertions.assertThrows(ForbiddenInteractionException.class, () -> registrationProcess.checkVerificationCode(""));
 
         // Set state to USERNAME_PASSWORD_SET, following interactions are not allowed:
         registrationProcess.setUsernameAndPassword("username", "password");
-        Assertions.assertThrows(IllegalStateException.class, registrationProcess::startAndWaitForVerification);
-        Assertions.assertThrows(IllegalStateException.class, () -> registrationProcess.setUsernameAndPassword("", ""));
-        Assertions.assertThrows(IllegalStateException.class, () -> registrationProcess.checkVerificationCode(""));
+        Assertions.assertThrows(ForbiddenInteractionException.class, registrationProcess::startAndWaitForVerification);
+        Assertions.assertThrows(ForbiddenInteractionException.class, () -> registrationProcess.setUsernameAndPassword("", ""));
+        Assertions.assertThrows(ForbiddenInteractionException.class, () -> registrationProcess.checkVerificationCode(""));
 
         // Set state to PHONE_NUMBER_SET, following interactions are not allowed:
         registrationProcess.setPhoneNumber("");
-        Assertions.assertThrows(IllegalStateException.class, () -> registrationProcess.setUsernameAndPassword("", ""));
-        Assertions.assertThrows(IllegalStateException.class, () -> registrationProcess.setPhoneNumber(""));
-        Assertions.assertThrows(IllegalStateException.class, () -> registrationProcess.checkVerificationCode(""));
+        Assertions.assertThrows(ForbiddenInteractionException.class, () -> registrationProcess.setUsernameAndPassword("", ""));
+        Assertions.assertThrows(ForbiddenInteractionException.class, () -> registrationProcess.setPhoneNumber(""));
+        Assertions.assertThrows(ForbiddenInteractionException.class, () -> registrationProcess.checkVerificationCode(""));
 
         // Set state to WAITING_FOR_PHONE_NUMBER_VERIFICATION, following interactions are not allowed:
         registrationProcess.startAndWaitForVerification();
-        Assertions.assertThrows(IllegalStateException.class, () -> registrationProcess.setUsernameAndPassword("", ""));
-        Assertions.assertThrows(IllegalStateException.class, () -> registrationProcess.setPhoneNumber(""));
-        Assertions.assertThrows(IllegalStateException.class, registrationProcess::startAndWaitForVerification);
+        Assertions.assertThrows(ForbiddenInteractionException.class, () -> registrationProcess.setUsernameAndPassword("", ""));
+        Assertions.assertThrows(ForbiddenInteractionException.class, () -> registrationProcess.setPhoneNumber(""));
+        Assertions.assertThrows(ForbiddenInteractionException.class, registrationProcess::startAndWaitForVerification);
 
         // Set state to PHONE_NUMBER_VERIFIED, following interactions are not allowed:
         registrationProcess.checkVerificationCode(registrationProcess.getVerificationCode());
-        Assertions.assertThrows(IllegalStateException.class, () -> registrationProcess.setUsernameAndPassword("", ""));
-        Assertions.assertThrows(IllegalStateException.class, () -> registrationProcess.setPhoneNumber(""));
-        Assertions.assertThrows(IllegalStateException.class, registrationProcess::startAndWaitForVerification);
+        Assertions.assertThrows(ForbiddenInteractionException.class, () -> registrationProcess.setUsernameAndPassword("", ""));
+        Assertions.assertThrows(ForbiddenInteractionException.class, () -> registrationProcess.setPhoneNumber(""));
+        Assertions.assertThrows(ForbiddenInteractionException.class, registrationProcess::startAndWaitForVerification);
     }
 
 }

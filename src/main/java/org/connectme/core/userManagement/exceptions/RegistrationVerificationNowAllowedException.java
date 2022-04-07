@@ -1,4 +1,4 @@
-package org.connectme.core.exceptions;
+package org.connectme.core.userManagement.exceptions;
 
 /**
  * This exception is thrown if another verification is currently not allowed in the verification process.

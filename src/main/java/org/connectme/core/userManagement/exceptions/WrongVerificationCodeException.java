@@ -1,4 +1,4 @@
-package org.connectme.core.exceptions;
+package org.connectme.core.userManagement.exceptions;
 
 /**
  * This exception is thrown if the user passed the wrong verification code
