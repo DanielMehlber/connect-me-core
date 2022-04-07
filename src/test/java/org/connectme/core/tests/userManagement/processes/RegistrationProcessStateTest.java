@@ -1,6 +1,7 @@
 package org.connectme.core.tests.userManagement.processes;
 
 import org.connectme.core.globalExceptions.ForbiddenInteractionException;
+import org.connectme.core.userManagement.entities.RegistrationUserData;
 import org.connectme.core.userManagement.exceptions.RegistrationVerificationNowAllowedException;
 import org.connectme.core.userManagement.exceptions.WrongVerificationCodeException;
 import org.connectme.core.userManagement.processes.RegistrationProcess;
@@ -22,14 +23,13 @@ public class RegistrationProcessStateTest {
         String password = "password";
         String phoneNumber = "0 000 000000";
 
+        RegistrationUserData userData = new RegistrationUserData(username, password, phoneNumber);
+
         RegistrationProcess registrationProcess = new RegistrationProcess();
 
-        registrationProcess.setUsernameAndPassword(username, password);
-        Assertions.assertEquals(registrationProcess.getUsername(), username);
-        Assertions.assertEquals(registrationProcess.getPassword(), password);
+        registrationProcess.setUserData(userData);
+        Assertions.assertEquals(registrationProcess.getPassedUserData(), userData);
 
-        registrationProcess.setPhoneNumber(phoneNumber);
-        Assertions.assertEquals(registrationProcess.getPhoneNumber(), phoneNumber);
 
         registrationProcess.startAndWaitForVerification();
 
@@ -37,7 +37,7 @@ public class RegistrationProcessStateTest {
         registrationProcess.checkVerificationCode(code);
 
         Assertions.assertTrue(registrationProcess.isVerified());
-        Assertions.assertSame(registrationProcess.getState(), RegistrationProcessState.PHONE_NUMBER_VERIFIED);
+        Assertions.assertSame(registrationProcess.getState(), RegistrationProcessState.USER_VERIFIED);
     }
 
     @Test
@@ -51,8 +51,7 @@ public class RegistrationProcessStateTest {
 
         RegistrationProcess registrationProcess = new RegistrationProcess();
 
-        registrationProcess.setUsernameAndPassword("username", "password");
-        registrationProcess.setPhoneNumber("0 0000 000000");
+        registrationProcess.setUserData(new RegistrationUserData("username", "password", "0 0000 00000"));
 
         // exceed max amount of allowed verifications attempts
         for (int i = 0; i <= RegistrationProcess.MAX_AMOUNT_VERIFICATION_ATTEMPTS; i++) {
@@ -86,8 +85,7 @@ public class RegistrationProcessStateTest {
 
         RegistrationProcess registrationProcess = new RegistrationProcess();
 
-        registrationProcess.setUsernameAndPassword("username", "password");
-        registrationProcess.setPhoneNumber("0 0000 000000");
+        registrationProcess.setUserData(new RegistrationUserData("username", "password", "0 0000 00000"));
 
         // exceed max attempt of verifications
         for (int i = 0; i <= RegistrationProcess.MAX_AMOUNT_VERIFICATION_ATTEMPTS; i++) {
@@ -112,34 +110,26 @@ public class RegistrationProcessStateTest {
          * Test that other interactions are not allowed
          */
 
+        RegistrationUserData userData = new RegistrationUserData("username", "password", "0 0000 00000");
+
         // Set state to CREATED, following interactions are not allowed:
         RegistrationProcess registrationProcess = new RegistrationProcess();
         Assertions.assertThrows(ForbiddenInteractionException.class, registrationProcess::startAndWaitForVerification);
-        Assertions.assertThrows(ForbiddenInteractionException.class, () -> registrationProcess.setPhoneNumber(""));
         Assertions.assertThrows(ForbiddenInteractionException.class, () -> registrationProcess.checkVerificationCode(""));
 
         // Set state to USERNAME_PASSWORD_SET, following interactions are not allowed:
-        registrationProcess.setUsernameAndPassword("username", "password");
-        Assertions.assertThrows(ForbiddenInteractionException.class, registrationProcess::startAndWaitForVerification);
-        Assertions.assertThrows(ForbiddenInteractionException.class, () -> registrationProcess.setUsernameAndPassword("", ""));
-        Assertions.assertThrows(ForbiddenInteractionException.class, () -> registrationProcess.checkVerificationCode(""));
-
-        // Set state to PHONE_NUMBER_SET, following interactions are not allowed:
-        registrationProcess.setPhoneNumber("");
-        Assertions.assertThrows(ForbiddenInteractionException.class, () -> registrationProcess.setUsernameAndPassword("", ""));
-        Assertions.assertThrows(ForbiddenInteractionException.class, () -> registrationProcess.setPhoneNumber(""));
+        registrationProcess.setUserData(userData);
+        Assertions.assertThrows(ForbiddenInteractionException.class, () -> registrationProcess.setUserData(userData));
         Assertions.assertThrows(ForbiddenInteractionException.class, () -> registrationProcess.checkVerificationCode(""));
 
         // Set state to WAITING_FOR_PHONE_NUMBER_VERIFICATION, following interactions are not allowed:
         registrationProcess.startAndWaitForVerification();
-        Assertions.assertThrows(ForbiddenInteractionException.class, () -> registrationProcess.setUsernameAndPassword("", ""));
-        Assertions.assertThrows(ForbiddenInteractionException.class, () -> registrationProcess.setPhoneNumber(""));
+        Assertions.assertThrows(ForbiddenInteractionException.class, () -> registrationProcess.setUserData(userData));
         Assertions.assertThrows(ForbiddenInteractionException.class, registrationProcess::startAndWaitForVerification);
 
         // Set state to PHONE_NUMBER_VERIFIED, following interactions are not allowed:
         registrationProcess.checkVerificationCode(registrationProcess.getVerificationCode());
-        Assertions.assertThrows(ForbiddenInteractionException.class, () -> registrationProcess.setUsernameAndPassword("", ""));
-        Assertions.assertThrows(ForbiddenInteractionException.class, () -> registrationProcess.setPhoneNumber(""));
+        Assertions.assertThrows(ForbiddenInteractionException.class, () -> registrationProcess.setUserData(userData));
         Assertions.assertThrows(ForbiddenInteractionException.class, registrationProcess::startAndWaitForVerification);
     }
 

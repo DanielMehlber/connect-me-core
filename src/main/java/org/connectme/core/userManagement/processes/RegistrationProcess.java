@@ -1,6 +1,7 @@
 package org.connectme.core.userManagement.processes;
 
 import org.connectme.core.globalExceptions.ForbiddenInteractionException;
+import org.connectme.core.userManagement.entities.RegistrationUserData;
 import org.connectme.core.userManagement.exceptions.RegistrationVerificationNowAllowedException;
 import org.connectme.core.userManagement.exceptions.WrongVerificationCodeException;
 import org.connectme.core.userManagement.entities.User;
@@ -28,14 +29,7 @@ public class RegistrationProcess {
     public static final int MAX_AMOUNT_VERIFICATION_ATTEMPTS = 3;
     public static final int BLOCK_FAILED_ATTEMPT_MINUTES = 5;
 
-    /** username suggestion of user (will not be reserved) */
-    private String username;
-
-    /** password in clear text format */
-    private String password;
-
-    /** telephone number of user */
-    private String phoneNumber;
+    private RegistrationUserData passedUserData;
 
     /** generated verification code for phone number verification */
     private String verificationCode;
@@ -71,41 +65,20 @@ public class RegistrationProcess {
      * PREVIOUS STEP: Registration has been created
      * NEXT STEP: user will enter his phone number
      *
-     * @param username valid username of user (must be checked before)
-     * @param password secure password of user (must be checked before)
+     * @param passedUserData user data passed by the user himself
      * @throws ForbiddenInteractionException this instance is currently in a different state and awaits different interactions
      * @author Daniel Mehlber
      */
-    public void setUsernameAndPassword(final String username, final String password) throws ForbiddenInteractionException {
+    public void setUserData(final RegistrationUserData passedUserData) throws ForbiddenInteractionException {
         if(state != RegistrationProcessState.CREATED)
             throw new ForbiddenInteractionException(
                     String.format("registration is in state %s and cannot accept username/password", state.name()));
         else {
-            this.username = username;
-            this.password = password;
-            state = RegistrationProcessState.USERNAME_PASSWORD_SET;
+            this.passedUserData = passedUserData;
+            state = RegistrationProcessState.USER_DATA_PASSED;
         }
     }
 
-    /**
-     * Invokes state after syntactically valid phone number has been passed by user.
-     *
-     * PREVIOUS STEP: username and password have been set
-     * NEXT STEP: verification code will be generated for verification process
-     *
-     * @param phoneNumber syntactically correct phone number (not verified yet)
-     * @throws ForbiddenInteractionException this instance is currently in a different state and awaits different interactions
-     * @author Daniel Mehlber
-     */
-    public void setPhoneNumber(final String phoneNumber) throws ForbiddenInteractionException {
-        if (state != RegistrationProcessState.USERNAME_PASSWORD_SET)
-            throw new ForbiddenInteractionException(
-                    String.format("registration is in state %s and cannot accept phone number", state.name()));
-        else {
-            this.phoneNumber = phoneNumber;
-            state = RegistrationProcessState.PHONE_NUMBER_SET;
-        }
-    }
 
     /**
      * Invokes state in which the passed phone number must be verified by user.
@@ -121,7 +94,7 @@ public class RegistrationProcess {
      * @author Daniel Mehlber
      */
     public void startAndWaitForVerification() throws ForbiddenInteractionException, RegistrationVerificationNowAllowedException {
-        if (state != RegistrationProcessState.PHONE_NUMBER_SET)
+        if (state != RegistrationProcessState.USER_DATA_PASSED)
             throw new ForbiddenInteractionException(
                     String.format("registration is in state %s and cannot wait for phone number verification", state.name()));
         else {
@@ -215,10 +188,10 @@ public class RegistrationProcess {
             if(verificationCode.equals(passedVerificationCode)) {
                 // CASE: correct verification code has been entered
                 verified = true;
-                state = RegistrationProcessState.PHONE_NUMBER_VERIFIED;
+                state = RegistrationProcessState.USER_VERIFIED;
             } else {
                 // CASE: wrong verification code, user must reenter verification process
-                state = RegistrationProcessState.PHONE_NUMBER_SET;
+                state = RegistrationProcessState.USER_DATA_PASSED;
                 throw new WrongVerificationCodeException(passedVerificationCode);
             }
         }
@@ -241,25 +214,15 @@ public class RegistrationProcess {
             lastVerificationAttempt = null;
             state = RegistrationProcessState.CREATED;
             verified = false;
-            phoneNumber = null;
-            username = null;
-            password = null;
+            passedUserData = null;
             verificationCode = null;
         } else {
             throw new ForbiddenInteractionException("a reset is currently not allowed/blocked");
         }
     }
 
-    public String getUsername() {
-        return username;
-    }
-
-    public String getPassword() {
-        return password;
-    }
-
-    public String getPhoneNumber() {
-        return phoneNumber;
+    public RegistrationUserData getPassedUserData() {
+        return passedUserData;
     }
 
     public String getVerificationCode() {

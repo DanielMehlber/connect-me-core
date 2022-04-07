@@ -1,13 +1,12 @@
 - # Process steps and states
 	- The Registration Process has multiple steps
-		- 1) User enters username and password
-		- 2) User enters his phone number
-		- 3) Verification code is generated and sent to passed phone number
-		- 4) User enters verification code in order to verify phone number
-		- 5) Profile is verified
-		- 6) User is registered
-	- ![Connect-me-registrationProcess-states.drawio.png](../assets/Connect-me-registration-states.drawio_1649025360406_0.png)
-	- Only certain interactions are allowed at each state. If other interactions are attempted a `IllegalStateException` is thrown.
+		- 1) User enters required information such as username, password, phone-number, etc
+		- 2) Verification code is generated and sent to passed phone number
+		- 3) User enters verification code in order to verify phone number
+		- 4) Profile is verified
+		- 5) User is created and persisted
+	- ![Connect-me-registration-states-Version 2.drawio.png](../assets/Connect-me-registration-states-Version_2.drawio_1649361849438_0.png)
+	- Only certain interactions are allowed at each state. If other interactions are attempted a `ForbiddenInteractionException` is thrown. This secures the stateful `RegistrationProcess` session bean from illegal interactions or _hacks_.
 - # Process vulnerabilities and counter actions
 	- ## Inputs of the clumsy user
 		- Taken username => availability must be checked
@@ -28,8 +27,8 @@
 		- Bypass verification block by restarting (=resetting) registrationProcess process => keep registrationProcess object in session and check if process restart/reset is allowed
 		-
 - # Implementation
-	- The Registration Process is controlled and represented by the `Registration` object **stored in the user's session**. It is a **State Machine**.
+	- The Registration Process is controlled and represented by the stateful `RegistrationProcess` object **stored in the user's session**. It is a **State Machine**.
 		- In every method the current state is checked in order to prevent illegal access
 		- In almost every method the state is changed
-		- That means, that higher logic only needs to work with the objects responses to certain interactions => nothing=allowed action, exception=forbidden action.
-	- The states of this object are defined in `RegistrationState`.
+		- That means, that higher logic only needs to work with the objects responses to certain interactions => The logic that checks if an interaction is allowed is implemented inside the `RegistrationProcess` object.
+	- The states of this object are defined in `RegistrationProcessState`.
