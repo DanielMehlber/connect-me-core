@@ -1,4 +1,4 @@
-package org.connectme.core.userManagement.processes;
+package org.connectme.core.userManagement.logic;
 
 import org.connectme.core.globalExceptions.ForbiddenInteractionException;
 import org.connectme.core.userManagement.entities.RegistrationUserData;
@@ -104,6 +104,8 @@ public class RegistrationProcess {
                 // CASE: verification attempt is allowed
                 this.verificationCode = generateVerificationCode();
                 state = RegistrationProcessState.WAITING_FOR_PHONE_NUMBER_VERIFICATION;
+
+                // TODO: send verification code via SMS (but only if not in testing mode)
             } else {
                 // CASE: not enough time has passed, prohibit another verification attempt
                 throw new RegistrationVerificationNowAllowedException();

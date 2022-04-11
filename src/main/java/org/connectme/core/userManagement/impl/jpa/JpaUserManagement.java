@@ -2,7 +2,7 @@ package org.connectme.core.userManagement.impl.jpa;
 
 import org.connectme.core.globalExceptions.InternalErrorException;
 import org.connectme.core.userManagement.UserManagement;
-import org.connectme.core.userManagement.processes.RegistrationProcess;
+import org.connectme.core.userManagement.logic.RegistrationProcess;
 import org.connectme.core.userManagement.entities.User;
 import org.connectme.core.userManagement.exceptions.NoSuchUserException;
 import org.connectme.core.userManagement.exceptions.UsernameAlreadyTakenException;

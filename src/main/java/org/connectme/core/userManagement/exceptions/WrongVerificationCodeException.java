@@ -8,7 +8,10 @@ public class WrongVerificationCodeException extends Exception {
     private final String wrongVerificationCode;
 
     public WrongVerificationCodeException(final String wrongVerificationCode) {
-        super(String.format("user passed wrong verification code '%s'", wrongVerificationCode));
+        /*
+         * SECURITY: Do NOT log raw user input, it could be harmful (see Log-Injection)
+         */
+        super("user passed wrong verification code");
         this.wrongVerificationCode = wrongVerificationCode;
     }
 

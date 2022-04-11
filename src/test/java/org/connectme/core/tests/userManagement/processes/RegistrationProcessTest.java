@@ -4,14 +4,14 @@ import org.connectme.core.globalExceptions.ForbiddenInteractionException;
 import org.connectme.core.userManagement.entities.RegistrationUserData;
 import org.connectme.core.userManagement.exceptions.RegistrationVerificationNowAllowedException;
 import org.connectme.core.userManagement.exceptions.WrongVerificationCodeException;
-import org.connectme.core.userManagement.processes.RegistrationProcess;
-import org.connectme.core.userManagement.processes.RegistrationProcessState;
+import org.connectme.core.userManagement.logic.RegistrationProcess;
+import org.connectme.core.userManagement.logic.RegistrationProcessState;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.Test;
 
 import java.time.LocalDateTime;
 
-public class RegistrationProcessStateTest {
+public class RegistrationProcessTest {
 
     @Test
     public void happyPath() throws RegistrationVerificationNowAllowedException, WrongVerificationCodeException, ForbiddenInteractionException {

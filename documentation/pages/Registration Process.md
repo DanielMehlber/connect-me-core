@@ -32,3 +32,5 @@
 		- In almost every method the state is changed
 		- That means, that higher logic only needs to work with the objects responses to certain interactions => The logic that checks if an interaction is allowed is implemented inside the `RegistrationProcess` object.
 	- The states of this object are defined in `RegistrationProcessState`.
+- # API
+	- {{embed [[Registration API]]}}

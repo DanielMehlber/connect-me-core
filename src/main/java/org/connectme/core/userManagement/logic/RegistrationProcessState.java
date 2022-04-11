@@ -1,4 +1,4 @@
-package org.connectme.core.userManagement.processes;
+package org.connectme.core.userManagement.logic;
 
 /**
  * This enum contains all states the Registration object goes through
