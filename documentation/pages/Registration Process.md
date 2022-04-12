@@ -6,7 +6,7 @@
 		- 4) Profile is verified
 		- 5) User is created and persisted
 	- ![Connect-me-registration-states-Version 2.drawio.png](../assets/Connect-me-registration-states-Version_2.drawio_1649361849438_0.png)
-	- Only certain interactions are allowed at each state. If other interactions are attempted a `ForbiddenInteractionException` is thrown. This secures the stateful `RegistrationProcess` session bean from illegal interactions or _hacks_.
+	- Only certain interactions are allowed at each state. If other interactions are attempted a `ForbiddenInteractionException` is thrown. This secures the `StatefulRegistrationBean` in session from illegal interactions or _hacks_.
 - # Process vulnerabilities and counter actions
 	- ## Inputs of the clumsy user
 		- Taken username => availability must be checked
@@ -16,21 +16,22 @@
 		- Invalid phone number (typo) => Phone number syntax check
 		- Wrong verification code (typo) => Repeat verification process
 	- ## Actions of the clumsy user
-		- Ends registrationProcess mid process => No database persistence along this process, store in session
+		- Ends statefulRegistrationBean mid process => No database persistence along this process, store in session
 	- ## Inputs of the evil user
 		- code injection => charset limitation and syntax checking
 		- too long inputs => limit input length
 		- profane username => **Profanity Check**
 	- ## Actions of the evil user
-		- Repeat verification process infinite times => restrict attempts per time per user
+		- Repeat verification process infinite times => restrict attempts per time (**Verification Block**)
+		  id:: 62542000-13cc-4331-be2f-931eab1c896c
 			- e.g. limit of 3 attempts. User will be blocked for 5mins after those
-		- Bypass verification block by restarting (=resetting) registrationProcess process => keep registrationProcess object in session and check if process restart/reset is allowed
+		- Bypass verification block by restarting (=resetting) statefulRegistrationBean process => keep statefulRegistrationBean object in session and check if process restart/reset is allowed
 		-
 - # Implementation
-	- The Registration Process is controlled and represented by the stateful `RegistrationProcess` object **stored in the user's session**. It is a **State Machine**.
+	- The Registration Process is controlled and represented by the `StatefulRegistrationBean` object **stored in the user's session**. It is a **State Machine**.
 		- In every method the current state is checked in order to prevent illegal access
 		- In almost every method the state is changed
-		- That means, that higher logic only needs to work with the objects responses to certain interactions => The logic that checks if an interaction is allowed is implemented inside the `RegistrationProcess` object.
-	- The states of this object are defined in `RegistrationProcessState`.
+		- That means, that higher logic only needs to work with the objects responses to certain interactions => The logic that checks if an interaction is allowed is implemented inside the `StatefulRegistrationBean` object.
+	- The states of this object are defined in `RegistrationState`.
 - # API
 	- {{embed [[Registration API]]}}

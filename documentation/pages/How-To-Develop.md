@@ -8,7 +8,7 @@
 		- Wir bauen auf **Test-Driven-Development** mit Unit und Intergration Tests, die garantieren, dass der Code immer solide und funktionstüchtig ist 👷
 		- Tests garantieren jedem Entwickler, dass seine Änderungen am Code keine Funktions- oder Sicherlücken hinterlassen haben und sind dadurch unvermeidbar ☝️
 	- ## III. Bombenfest
-		- Unser Code und unsere Prozesse müssen funktionell und sicherheits-technisch bombenfest, also gegen tollpatschige und böse Benutzer gerüstet sein {{cloze denn davon gibt es zu viele}} .
+		- Unser Code und unsere Prozesse müssen ^^funktionell und sicherheits-technisch bombenfest^^, also gegen tollpatschige und böse Benutzer gerüstet sein {{cloze denn davon gibt es zu viele}} .
 		- Denke daher immer beim Design einer Routine/Prozess/Funktion nach, wie man sie ausnutzen könnte.
 	- ## IV. Shared Coding Space
 		- Die Entwicklung findet (meistens) im Mehr-Personen-Betrieb statt 🧑‍🤝‍🧑. Das Bedeutet, dass neue Programmierer jederzeit hinzukommen können und andere Entwickler mit dir arbeiten, **die deinen Code ohne Mühe verstehen wollen**.

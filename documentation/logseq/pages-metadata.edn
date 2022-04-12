@@ -7,9 +7,9 @@
  {:block/name "account update process",
   :block/created-at 1649025096571,
   :block/updated-at 1649025096571}
- {:block/name "apr 11th, 2022",
-  :block/created-at 1649665275459,
-  :block/updated-at 1649665275459}
+ {:block/name "apr 12th, 2022",
+  :block/created-at 1649754091029,
+  :block/updated-at 1649754091029}
  {:block/name "apr 4th, 2022",
   :block/created-at 1649024885137,
   :block/updated-at 1649026623720}
@@ -42,7 +42,7 @@
   :block/updated-at 1649058944387}
  {:block/name "how-to-develop",
   :block/created-at 1649360956152,
-  :block/updated-at 1649369048520}
+  :block/updated-at 1649755322736}
  {:block/name "in-progress",
   :block/created-at 1649058944387,
   :block/updated-at 1649058944387}
@@ -60,19 +60,19 @@
   :block/updated-at 1649368953946}
  {:block/name "project structure",
   :block/created-at 1649361071512,
-  :block/updated-at 1649361071512}
+  :block/updated-at 1649755150300}
  {:block/name "registration api",
   :block/created-at 1649416713443,
-  :block/updated-at 1649419627290}
+  :block/updated-at 1649754849085}
  {:block/name "registration process",
   :block/created-at 1649024961508,
-  :block/updated-at 1649416772553}
+  :block/updated-at 1649754319288}
  {:block/name "todo",
   :block/created-at 1649058944387,
   :block/updated-at 1649058944387}
- {:block/name "user management",
+ {:block/name "user management component",
   :block/created-at 1649024932567,
-  :block/updated-at 1649057142424}
+  :block/updated-at 1649755233320}
  {:block/name "wait",
   :block/created-at 1649058944387,
   :block/updated-at 1649058944387}
