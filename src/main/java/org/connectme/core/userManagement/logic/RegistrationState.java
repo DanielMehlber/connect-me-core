@@ -1,9 +1,9 @@
-package org.connectme.core.userManagement.entities;
+package org.connectme.core.userManagement.logic;
 
 /**
  * This enum contains all states the Registration object goes through
  */
-public enum RegistrationProcessState {
+public enum RegistrationState {
 
     /**
      * When created, nothing is set
@@ -13,15 +13,11 @@ public enum RegistrationProcessState {
     /**
      * In Phase 1 the user passes username and password
      */
-    USERNAME_PASSWORD_SET,
+    USER_DATA_PASSED,
+
 
     /**
-     * In Phase 2 the user passes his phone number (that is not verified yet)
-     */
-    PHONE_NUMBER_SET,
-
-    /**
-     * In Phase 3 the user must verify his phone number (with generated verification code)
+     * In Phase 2 the user must verify his phone number (with generated verification code)
      */
     WAITING_FOR_PHONE_NUMBER_VERIFICATION,
 
@@ -29,5 +25,5 @@ public enum RegistrationProcessState {
     /**
      * In Phase 3 the user has verified his phone number
      */
-    PHONE_NUMBER_VERIFIED
+    USER_VERIFIED
 }

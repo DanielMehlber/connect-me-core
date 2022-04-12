@@ -1,4 +1,4 @@
-package org.connectme.core.exceptions;
+package org.connectme.core.globalExceptions;
 
 /**
  * This exception is thrown if a fatal internal error occurred.

@@ -1,0 +1,156 @@
+package org.connectme.core.userManagement.entities;
+
+import com.fasterxml.jackson.annotation.JsonCreator;
+import com.fasterxml.jackson.annotation.JsonProperty;
+import org.connectme.core.userManagement.exceptions.PasswordTooWeakException;
+import org.connectme.core.userManagement.exceptions.UsernameNotAllowedException;
+
+import java.util.Objects;
+
+/**
+ * This class contains all user data passed by the user himself mid-registration.
+ * When any setter is accessed, the data is automatically checked. This is because the user cannot be trusted.
+ */
+public class RegistrationUserData {
+
+    /** username suggestion of user (will not be reserved) */
+    private String username;
+    public static final int MIN_USERNAME_LENGTH = 4;
+    public static final int MAX_USERNAME_LENGTH = 20;
+
+    /** password in clear text format */
+    private String password;
+    public static final int MIN_PASSWORD_LENGTH = 8;
+
+    /** telephone number of user */
+    private String phoneNumber;
+
+    /*
+     * THIS CONSTRUCTOR IS MEANT TO BE PRIVATE
+     * This default constructor is private because it is used to deserialize an object from JSON
+     * and therefore is used only by the jackson library (which has private access to this class).
+     * In any other scenario there is no use for a default constructor (with no arguments) and therefore
+     * public access is prohibited.
+     */
+    private RegistrationUserData() {}
+
+    /**
+     * This constructor is used to deserialize the JSON string passed by the user.
+     * @param username username of user (unchecked)
+     * @param password password of user (unchecked)
+     * @param phoneNumber phoneNumber of user (unchecked)
+     */
+    @JsonCreator
+    public RegistrationUserData(@JsonProperty("username") final String username,
+                                @JsonProperty("password") final String password,
+                                @JsonProperty("phoneNumber") final String phoneNumber) {
+        setUsername(username);
+        setPassword(password);
+        setPhoneNumber(phoneNumber);
+    }
+
+    public String getUsername() {
+        return username;
+    }
+
+    public void setUsername(String username) {
+        this.username = username;
+    }
+
+    public String getPassword() {
+        return password;
+    }
+
+    public void setPassword(String password) {
+        this.password = password;
+    }
+
+    public String getPhoneNumber() {
+        return phoneNumber;
+    }
+
+    public void setPhoneNumber(String phoneNumber) {
+        this.phoneNumber = phoneNumber;
+    }
+
+    /**
+     * Check if passed user data is valid and can be accepted by the system.
+     *
+     * @throws PasswordTooWeakException the provided password is not strong enough
+     * @throws UsernameNotAllowedException the username is forbidden for various reasons
+     */
+    public void check() throws PasswordTooWeakException, UsernameNotAllowedException {
+        checkUsernameValue(this.username);
+        checkPasswordValue(this.password, this.username);
+        // TODO: check phone number value
+    }
+
+    /**
+     * Takes the passed username and checks if it's a valid username that can be accepted by the system
+     *
+     * @param passedUsername username to check
+     * @throws UsernameNotAllowedException the username is not allowed and must not be accepted by the system
+     */
+    public static void checkUsernameValue(final String passedUsername) throws UsernameNotAllowedException {
+        if(passedUsername.length() > MAX_USERNAME_LENGTH || passedUsername.length() < MIN_USERNAME_LENGTH)
+            throw new UsernameNotAllowedException(passedUsername, UsernameNotAllowedException.Reason.LENGTH);
+        else if (!passedUsername.matches("^[a-zA-Z0-9-_]*$"))
+            //                                  ^^^^^^^^^^^^^^^^ allow only A-Z, a-z, 0-9, -_
+            throw new UsernameNotAllowedException(passedUsername, UsernameNotAllowedException.Reason.SYNTAX);
+
+        // TODO: Profanity Check
+    }
+
+    /**
+     * Takes the passed password and checks if it's a valid password that can be accepted by the system
+     *
+     * @param passedPassword the password that needs to be checked
+     * @param username username that is not allowed to be contained in password
+     * @throws PasswordTooWeakException the password is too weak
+     */
+    public static void checkPasswordValue(final String passedPassword, final String username) throws PasswordTooWeakException {
+
+        /*
+         * a password needs
+         * - at least 8 characters
+         * - at least 2 digits
+         * - it must not contain the username
+         */
+
+        /*
+         * at least MIN_PASSWORD_LENGTH amount of characters
+         */
+        if(passedPassword.length() < MIN_PASSWORD_LENGTH)
+            throw new PasswordTooWeakException();
+
+        /*
+         * count digits and check if there are more than 2
+         */
+        int digits = 0;
+        for(char c : passedPassword.toCharArray()) {
+            if(Character.isDigit(c))
+                digits++;
+        }
+        if(digits < 3)
+            throw new PasswordTooWeakException();
+
+        /*
+         * make sure that username is not part of the password
+         */
+        if(passedPassword.contains(username))
+            throw new PasswordTooWeakException();
+    }
+
+    @Override
+    public boolean equals(Object o) {
+        if (this == o) return true;
+        if (o == null || getClass() != o.getClass()) return false;
+        RegistrationUserData that = (RegistrationUserData) o;
+        return Objects.equals(getUsername(), that.getUsername()) && Objects.equals(getPassword(), that.getPassword()) && Objects.equals(getPhoneNumber(), that.getPhoneNumber());
+    }
+
+    @Override
+    public int hashCode() {
+        return Objects.hash(getUsername(), getPassword(), getPhoneNumber());
+    }
+}

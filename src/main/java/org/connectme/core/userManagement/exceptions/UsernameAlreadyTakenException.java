@@ -10,8 +10,11 @@ public class UsernameAlreadyTakenException extends Exception {
      */
     private final String username;
 
-    public UsernameAlreadyTakenException(final String username, final Throwable cause) {
-        super(String.format("The username '%s' is already taken", username), cause);
+    public UsernameAlreadyTakenException(final String username) {
+        /*
+         * Do NOT log username, it is raw user input and could be harmful (see Log-Injection)
+         */
+        super("The passed username is already taken");
         this.username = username;
     }
 
