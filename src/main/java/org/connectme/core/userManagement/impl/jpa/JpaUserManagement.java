@@ -2,7 +2,7 @@ package org.connectme.core.userManagement.impl.jpa;
 
 import org.connectme.core.globalExceptions.InternalErrorException;
 import org.connectme.core.userManagement.UserManagement;
-import org.connectme.core.userManagement.logic.RegistrationProcess;
+import org.connectme.core.userManagement.logic.StatefulRegistrationBean;
 import org.connectme.core.userManagement.entities.User;
 import org.connectme.core.userManagement.exceptions.NoSuchUserException;
 import org.connectme.core.userManagement.exceptions.UsernameAlreadyTakenException;
@@ -21,7 +21,7 @@ public class JpaUserManagement implements UserManagement {
     }
 
     @Override
-    public void createNewUser(RegistrationProcess userdata) throws RuntimeException, InternalErrorException, UsernameAlreadyTakenException {
+    public void createNewUser(StatefulRegistrationBean userdata) throws RuntimeException, InternalErrorException, UsernameAlreadyTakenException {
 
     }
 

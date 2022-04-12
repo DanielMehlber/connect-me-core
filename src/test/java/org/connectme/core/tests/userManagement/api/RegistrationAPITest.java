@@ -5,7 +5,9 @@ import org.junit.jupiter.api.Test;
 public class RegistrationAPITest {
 
     @Test
-    public void happyPath() {}
+    public void happyPath() {
+
+    }
 
     @Test
     public void attemptInvalidUserData() {}

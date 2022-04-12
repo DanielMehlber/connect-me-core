@@ -3,7 +3,7 @@ package org.connectme.core.userManagement.logic;
 /**
  * This enum contains all states the Registration object goes through
  */
-public enum RegistrationProcessState {
+public enum RegistrationState {
 
     /**
      * When created, nothing is set

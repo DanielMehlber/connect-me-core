@@ -2,8 +2,7 @@ package org.connectme.core.userManagement.logic;
 
 import org.connectme.core.globalExceptions.ForbiddenInteractionException;
 import org.connectme.core.userManagement.entities.RegistrationUserData;
-import org.connectme.core.userManagement.exceptions.RegistrationVerificationNowAllowedException;
-import org.connectme.core.userManagement.exceptions.WrongVerificationCodeException;
+import org.connectme.core.userManagement.exceptions.*;
 import org.connectme.core.userManagement.entities.User;
 import org.springframework.stereotype.Component;
 import org.springframework.web.context.annotation.SessionScope;
@@ -24,7 +23,7 @@ import java.util.Random;
  */
 @Component
 @SessionScope
-public class RegistrationProcess {
+public class StatefulRegistrationBean {
 
     public static final int MAX_AMOUNT_VERIFICATION_ATTEMPTS = 3;
     public static final int BLOCK_FAILED_ATTEMPT_MINUTES = 5;
@@ -47,13 +46,13 @@ public class RegistrationProcess {
      * The registration process has multiple steps along which the client updates the instances state
      * e.g. before and after phone number verification
      */
-    private RegistrationProcessState state;
+    private RegistrationState state;
 
     /**
      * Creates new Registration and sets state accordingly
      * @author Daniel Mehlber
      */
-    public RegistrationProcess() {
+    public StatefulRegistrationBean() {
         try {
             reset();
         } catch (ForbiddenInteractionException ignored) {}
@@ -67,15 +66,21 @@ public class RegistrationProcess {
      *
      * @param passedUserData user data passed by the user himself
      * @throws ForbiddenInteractionException this instance is currently in a different state and awaits different interactions
+     * @throws UserDataInsufficientException the user data was checked and declared insufficient or invalid
      * @author Daniel Mehlber
      */
-    public void setUserData(final RegistrationUserData passedUserData) throws ForbiddenInteractionException {
-        if(state != RegistrationProcessState.CREATED)
+    public void setUserData(final RegistrationUserData passedUserData) throws ForbiddenInteractionException, UserDataInsufficientException {
+        if(state != RegistrationState.CREATED)
             throw new ForbiddenInteractionException(
                     String.format("registration is in state %s and cannot accept username/password", state.name()));
         else {
+            try {
+                passedUserData.check();
+            } catch (final PasswordTooWeakException | UsernameNotAllowedException reason) {
+                throw new UserDataInsufficientException(reason);
+            }
             this.passedUserData = passedUserData;
-            state = RegistrationProcessState.USER_DATA_PASSED;
+            state = RegistrationState.USER_DATA_PASSED;
         }
     }
 
@@ -94,7 +99,7 @@ public class RegistrationProcess {
      * @author Daniel Mehlber
      */
     public void startAndWaitForVerification() throws ForbiddenInteractionException, RegistrationVerificationNowAllowedException {
-        if (state != RegistrationProcessState.USER_DATA_PASSED)
+        if (state != RegistrationState.USER_DATA_PASSED)
             throw new ForbiddenInteractionException(
                     String.format("registration is in state %s and cannot wait for phone number verification", state.name()));
         else {
@@ -103,7 +108,7 @@ public class RegistrationProcess {
             if(isVerificationAttemptCurrentlyAllowed()) {
                 // CASE: verification attempt is allowed
                 this.verificationCode = generateVerificationCode();
-                state = RegistrationProcessState.WAITING_FOR_PHONE_NUMBER_VERIFICATION;
+                state = RegistrationState.WAITING_FOR_PHONE_NUMBER_VERIFICATION;
 
                 // TODO: send verification code via SMS (but only if not in testing mode)
             } else {
@@ -178,7 +183,7 @@ public class RegistrationProcess {
      * @author Daniel Mehlber
      */
     public void checkVerificationCode(final String passedVerificationCode) throws ForbiddenInteractionException, WrongVerificationCodeException {
-        if(state != RegistrationProcessState.WAITING_FOR_PHONE_NUMBER_VERIFICATION)
+        if(state != RegistrationState.WAITING_FOR_PHONE_NUMBER_VERIFICATION)
             throw new ForbiddenInteractionException(
                     String.format("registration is in state %s and cannot accept verification codes", state.name()));
         else {
@@ -190,10 +195,10 @@ public class RegistrationProcess {
             if(verificationCode.equals(passedVerificationCode)) {
                 // CASE: correct verification code has been entered
                 verified = true;
-                state = RegistrationProcessState.USER_VERIFIED;
+                state = RegistrationState.USER_VERIFIED;
             } else {
                 // CASE: wrong verification code, user must reenter verification process
-                state = RegistrationProcessState.USER_DATA_PASSED;
+                state = RegistrationState.USER_DATA_PASSED;
                 throw new WrongVerificationCodeException(passedVerificationCode);
             }
         }
@@ -214,7 +219,7 @@ public class RegistrationProcess {
         if(isResetAllowed()) {
             verificationAttempts = 0;
             lastVerificationAttempt = null;
-            state = RegistrationProcessState.CREATED;
+            state = RegistrationState.CREATED;
             verified = false;
             passedUserData = null;
             verificationCode = null;
@@ -235,7 +240,7 @@ public class RegistrationProcess {
         return verified;
     }
 
-    public RegistrationProcessState getState() {
+    public RegistrationState getState() {
         return state;
     }
 
