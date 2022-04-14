@@ -1,6 +1,7 @@
 package org.connectme.core.tests.userManagement.processes;
 
 import org.connectme.core.globalExceptions.ForbiddenInteractionException;
+import org.connectme.core.tests.userManagement.testUtil.UserDataRepository;
 import org.connectme.core.userManagement.entities.RegistrationUserData;
 import org.connectme.core.userManagement.exceptions.RegistrationVerificationNowAllowedException;
 import org.connectme.core.userManagement.exceptions.UserDataInsufficientException;
@@ -20,8 +21,8 @@ public class StatefulRegistrationBeanTest {
          * SCENARIO: go through happy path of registration process
          */
 
-        String username = "username";
-        String password = "password123";
+        String username = UserDataRepository.Usernames.getRandomAllowed();
+        String password = UserDataRepository.Passwords.randomAllowed();
         String phoneNumber = "0 000 000000";
 
         RegistrationUserData userData = new RegistrationUserData(username, password, phoneNumber);
@@ -52,7 +53,7 @@ public class StatefulRegistrationBeanTest {
 
         StatefulRegistrationBean statefulRegistrationBean = new StatefulRegistrationBean();
 
-        statefulRegistrationBean.setUserData(new RegistrationUserData("username", "password123", "0 0000 00000"));
+        statefulRegistrationBean.setUserData(UserDataRepository.assembleValidRegistrationUserData());
 
         // exceed max amount of allowed verifications attempts
         for (int i = 0; i <= StatefulRegistrationBean.MAX_AMOUNT_VERIFICATION_ATTEMPTS; i++) {
@@ -86,7 +87,7 @@ public class StatefulRegistrationBeanTest {
 
         StatefulRegistrationBean statefulRegistrationBean = new StatefulRegistrationBean();
 
-        statefulRegistrationBean.setUserData(new RegistrationUserData("username", "password123", "0 0000 00000"));
+        statefulRegistrationBean.setUserData(UserDataRepository.assembleValidRegistrationUserData());
 
         // exceed max attempt of verifications
         for (int i = 0; i <= StatefulRegistrationBean.MAX_AMOUNT_VERIFICATION_ATTEMPTS; i++) {
@@ -111,7 +112,7 @@ public class StatefulRegistrationBeanTest {
          * Test that other interactions are not allowed
          */
 
-        RegistrationUserData userData = new RegistrationUserData("username", "password123", "0 0000 00000");
+        RegistrationUserData userData = UserDataRepository.assembleValidRegistrationUserData();
 
         // Set state to CREATED, following interactions are not allowed:
         StatefulRegistrationBean statefulRegistrationBean = new StatefulRegistrationBean();

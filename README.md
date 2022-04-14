@@ -23,6 +23,8 @@ docker-compose -f docker-compose-environment.yml build
 # in order to setup environment systems (will run in background)
 docker-compose -f docker-compose-environment.yml up -d
 
+# ... wait a few seconds for database setup to complete ...
+
 ## EXECUTE IN ORDER TO RUN UNIT TESTS
 # in order to build and run unit tests using maven
 mvn test

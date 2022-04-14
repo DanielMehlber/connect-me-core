@@ -7,6 +7,7 @@
 	- ## II. Testing, Testing, Testing
 		- Wir bauen auf **Test-Driven-Development** mit Unit und Intergration Tests, die garantieren, dass der Code immer solide und funktionstüchtig ist 👷
 		- Tests garantieren jedem Entwickler, dass seine Änderungen am Code keine Funktions- oder Sicherlücken hinterlassen haben und sind dadurch unvermeidbar ☝️
+		- Wie man in Java & Spring Boot tests schreibt findet man unter [[How-To-Test]]
 	- ## III. Bombenfest
 		- Unser Code und unsere Prozesse müssen ^^funktionell und sicherheits-technisch bombenfest^^, also gegen tollpatschige und böse Benutzer gerüstet sein {{cloze denn davon gibt es zu viele}} .
 		- Denke daher immer beim Design einer Routine/Prozess/Funktion nach, wie man sie ausnutzen könnte.

@@ -6,9 +6,11 @@ import org.connectme.core.userManagement.logic.StatefulRegistrationBean;
 import org.connectme.core.userManagement.entities.User;
 import org.connectme.core.userManagement.exceptions.NoSuchUserException;
 import org.connectme.core.userManagement.exceptions.UsernameAlreadyTakenException;
+import org.springframework.context.annotation.Primary;
 import org.springframework.stereotype.Component;
 
 @Component("JpaUserManagement")
+@Primary
 public class JpaUserManagement implements UserManagement {
     @Override
     public boolean isUsernameAvailable(String username) throws RuntimeException, InternalErrorException {

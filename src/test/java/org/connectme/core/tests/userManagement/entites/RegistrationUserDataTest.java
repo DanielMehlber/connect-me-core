@@ -1,5 +1,6 @@
 package org.connectme.core.tests.userManagement.entites;
 
+import org.connectme.core.tests.userManagement.testUtil.UserDataRepository;
 import org.connectme.core.userManagement.entities.RegistrationUserData;
 import org.connectme.core.userManagement.exceptions.PasswordTooWeakException;
 import org.connectme.core.userManagement.exceptions.UsernameNotAllowedException;
@@ -8,46 +9,14 @@ import org.junit.jupiter.api.Test;
 
 public class RegistrationUserDataTest {
 
-    private final String[] allowedUsernames = {
-            "someusername",
-            "some_user_name",
-            "username123",
-            "Us3rNaM3",
-            "the_underscore_user"
-    };
-
-    // TODO: ADD Profane user names
-    private final String[] forbiddenUsernames = {
-            "white space",
-            "multi\nline",
-            "tabs\ttabs",
-            "excamation!",
-            "question?",
-            "point.syntax",
-            "list,list,list",
-            "</hacker>",
-    };
-
-    private final String[] allowedPasswords = {
-            "kajfhlaksjfh394857345h3kjh",
-            "s8d7f6s8d7f6s8d7fs8d7f",
-            "wrl645pha"
-    };
-
-    private final String[] forbiddenPasswords = {
-            "hallo",
-            "1234",
-            "password3"
-    };
-
     @Test
     public void testCheckUsernamesSyntax() throws UsernameNotAllowedException {
 
-        for(String allowed : allowedUsernames) {
+        for(String allowed : UserDataRepository.Usernames.allowed) {
             RegistrationUserData.checkUsernameValue(allowed);
         }
 
-        for(String forbidden : forbiddenUsernames) {
+        for(String forbidden : UserDataRepository.Usernames.forbidden) {
             Assertions.assertThrows(UsernameNotAllowedException.class, () -> RegistrationUserData.checkUsernameValue(forbidden));
         }
 
@@ -85,11 +54,11 @@ public class RegistrationUserDataTest {
     public void testCheckPassword() throws PasswordTooWeakException {
 
         String username = "username";
-        for(String allowed : allowedPasswords) {
+        for(String allowed : UserDataRepository.Passwords.allowed) {
             RegistrationUserData.checkPasswordValue(allowed, username);
         }
 
-        for(String forbidden : forbiddenPasswords) {
+        for(String forbidden : UserDataRepository.Passwords.forbidden) {
             Assertions.assertThrows(PasswordTooWeakException.class,
                     () -> RegistrationUserData.checkPasswordValue(forbidden, username));
         }
