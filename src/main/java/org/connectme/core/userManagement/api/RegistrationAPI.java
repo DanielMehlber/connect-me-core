@@ -7,6 +7,7 @@ import org.connectme.core.userManagement.exceptions.UserDataInsufficientExceptio
 import org.connectme.core.userManagement.exceptions.WrongVerificationCodeException;
 import org.connectme.core.userManagement.logic.StatefulRegistrationBean;
 import org.springframework.web.bind.annotation.PostMapping;
+import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RestController;
 
 import javax.servlet.http.HttpSession;
@@ -47,7 +48,7 @@ public class RegistrationAPI {
      * @throws UserDataInsufficientException the passed user data cannot be accepted by the system for some reason
      */
     @PostMapping(value="/users/registration/set/userdata", consumes="application/json")
-    public void uploadUserData(HttpSession session, final RegistrationUserData userData) throws ForbiddenInteractionException, UserDataInsufficientException {
+    public void uploadUserData(HttpSession session, @RequestBody final RegistrationUserData userData) throws ForbiddenInteractionException, UserDataInsufficientException {
         StatefulRegistrationBean registration = (StatefulRegistrationBean) session.getAttribute(SESSION_REGISTRATION);
         if(registration == null)
             throw new ForbiddenInteractionException("No registration found in session");
@@ -84,7 +85,7 @@ public class RegistrationAPI {
      * @throws WrongVerificationCodeException the passed verification code is not correct
      */
     @PostMapping(value="/users/registration/verify", consumes="text/plain")
-    public void verifyWithCode(HttpSession session, final String passedVerificationCode) throws ForbiddenInteractionException, WrongVerificationCodeException {
+    public void verifyWithCode(HttpSession session, @RequestBody  final String passedVerificationCode) throws ForbiddenInteractionException, WrongVerificationCodeException {
         StatefulRegistrationBean registration = (StatefulRegistrationBean) session.getAttribute(SESSION_REGISTRATION);
         if(registration == null)
             throw new ForbiddenInteractionException("No registration found in session");

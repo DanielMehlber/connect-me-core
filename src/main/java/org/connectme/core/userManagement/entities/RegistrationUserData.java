@@ -1,6 +1,7 @@
 package org.connectme.core.userManagement.entities;
 
 import com.fasterxml.jackson.annotation.JsonCreator;
+import com.fasterxml.jackson.annotation.JsonInclude;
 import com.fasterxml.jackson.annotation.JsonProperty;
 import org.connectme.core.userManagement.exceptions.PasswordTooWeakException;
 import org.connectme.core.userManagement.exceptions.UsernameNotAllowedException;
@@ -11,6 +12,7 @@ import java.util.Objects;
  * This class contains all user data passed by the user himself mid-registration.
  * When any setter is accessed, the data is automatically checked. This is because the user cannot be trusted.
  */
+@JsonInclude(JsonInclude.Include.NON_NULL)
 public class RegistrationUserData {
 
     /** username suggestion of user (will not be reserved) */
@@ -41,9 +43,9 @@ public class RegistrationUserData {
      * @param phoneNumber phoneNumber of user (unchecked)
      */
     @JsonCreator
-    public RegistrationUserData(@JsonProperty("username") final String username,
-                                @JsonProperty("password") final String password,
-                                @JsonProperty("phoneNumber") final String phoneNumber) {
+    public RegistrationUserData(@JsonProperty(value = "username", required = true) final String username,
+                                @JsonProperty(value = "password", required = true) final String password,
+                                @JsonProperty(value = "phoneNumber", required = true) final String phoneNumber) {
         setUsername(username);
         setPassword(password);
         setPhoneNumber(phoneNumber);
