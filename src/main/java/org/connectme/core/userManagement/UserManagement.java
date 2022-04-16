@@ -1,7 +1,6 @@
 package org.connectme.core.userManagement;
 
 import org.connectme.core.globalExceptions.InternalErrorException;
-import org.connectme.core.userManagement.logic.StatefulRegistrationBean;
 import org.connectme.core.userManagement.entities.User;
 import org.connectme.core.userManagement.exceptions.NoSuchUserException;
 import org.connectme.core.userManagement.exceptions.UsernameAlreadyTakenException;
@@ -45,7 +44,7 @@ public interface UserManagement {
      * @throws InternalErrorException possible internal errors e.g. because of database connection
      * @throws UsernameAlreadyTakenException user with this username cannot be created, username is not available
      */
-    void createNewUser(final StatefulRegistrationBean userdata) throws RuntimeException, InternalErrorException, UsernameAlreadyTakenException;
+    void createNewUser(final User userdata) throws RuntimeException, InternalErrorException, UsernameAlreadyTakenException;
 
     /**
      * Update user data
