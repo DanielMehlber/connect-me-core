@@ -1,6 +1,6 @@
 package org.connectme.core.tests.userManagement.entites;
 
-import org.connectme.core.tests.userManagement.testUtil.UserDataRepository;
+import org.connectme.core.tests.userManagement.testUtil.TestUserDataRepository;
 import org.connectme.core.userManagement.entities.RegistrationUserData;
 import org.connectme.core.userManagement.exceptions.PasswordTooWeakException;
 import org.connectme.core.userManagement.exceptions.UsernameNotAllowedException;
@@ -9,19 +9,27 @@ import org.junit.jupiter.api.Test;
 
 public class RegistrationUserDataTest {
 
+    /**
+     * Check username syntax checker
+     * @throws UsernameNotAllowedException username has been found not acceptable by system
+     */
     @Test
     public void testCheckUsernamesSyntax() throws UsernameNotAllowedException {
 
-        for(String allowed : UserDataRepository.Usernames.allowed) {
+        for(String allowed : TestUserDataRepository.Usernames.allowed) {
             RegistrationUserData.checkUsernameValue(allowed);
         }
 
-        for(String forbidden : UserDataRepository.Usernames.forbidden) {
+        for(String forbidden : TestUserDataRepository.Usernames.forbidden) {
             Assertions.assertThrows(UsernameNotAllowedException.class, () -> RegistrationUserData.checkUsernameValue(forbidden));
         }
 
     }
 
+    /**
+     * Attempt usernames that are not long enough or too long.
+     * @throws UsernameNotAllowedException username is not allowed, but was expected to
+     */
     @Test
     public void testCheckUsernamesLength() throws UsernameNotAllowedException {
 
@@ -50,21 +58,28 @@ public class RegistrationUserDataTest {
 
     }
 
+    /**
+     * Test password strength checker
+     * @throws PasswordTooWeakException password has been found too weak by system
+     */
     @Test
     public void testCheckPassword() throws PasswordTooWeakException {
 
         String username = "username";
-        for(String allowed : UserDataRepository.Passwords.allowed) {
+        for(String allowed : TestUserDataRepository.Passwords.allowed) {
             RegistrationUserData.checkPasswordValue(allowed, username);
         }
 
-        for(String forbidden : UserDataRepository.Passwords.forbidden) {
+        for(String forbidden : TestUserDataRepository.Passwords.forbidden) {
             Assertions.assertThrows(PasswordTooWeakException.class,
                     () -> RegistrationUserData.checkPasswordValue(forbidden, username));
         }
 
     }
 
+    /**
+     * the password must not contain the username. Tests the password strength checker.
+     */
     @Test
     public void attemptPasswordSameAsUsername() {
         Assertions.assertThrows(PasswordTooWeakException.class,

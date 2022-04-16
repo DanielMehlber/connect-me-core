@@ -34,6 +34,7 @@ public class RegistrationUserData {
      * In any other scenario there is no use for a default constructor (with no arguments) and therefore
      * public access is prohibited.
      */
+    @SuppressWarnings("unused")
     private RegistrationUserData() {}
 
     /**

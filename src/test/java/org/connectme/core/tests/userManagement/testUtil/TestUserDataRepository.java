@@ -8,7 +8,7 @@ import java.util.Random;
  * This util class contains a repository of usernames and password (both allowed and forbidden) that can be used
  * by various test scenarios.
  */
-public class UserDataRepository {
+public class TestUserDataRepository {
 
     /**
      * Repository of usernames (both allowed and forbidden) for various testing scenarios
@@ -74,19 +74,65 @@ public class UserDataRepository {
                 "password3"
         };
 
-        public static String randomAllowed() {
+        public static String getRandomAllowed() {
             int randomIndex = new Random().nextInt(allowed.length);
             return allowed[randomIndex];
         }
 
-        public static String randomForbidden() {
+        public static String getRandomForbidden() {
             int randomIndex = new Random().nextInt(forbidden.length);
             return forbidden[randomIndex];
         }
     }
 
-    public static final RegistrationUserData assembleValidRegistrationUserData() {
-        return new RegistrationUserData(UserDataRepository.Usernames.getRandomAllowed(), UserDataRepository.Passwords.randomAllowed(), "0 0000 00000");
+    public static class PhoneNumbers {
+
+        /**
+         * list of allowed phone numbers
+         */
+        public static final String[] allowed = {
+                "0 0000 000000"
+        };
+
+        /**
+         * list of forbidden phone numbers
+         */
+        public static final String[] forbidden = {
+                "noNumber"
+        };
+
+
+        /**
+         * selects a random allowed phone number from list and returns it
+         * @return a random phone number that is allowed by the system
+         */
+        public static String getRandomAllowed() {
+            int randomIndex = new Random().nextInt(allowed.length);
+            return allowed[randomIndex];
+        }
+
+        /**
+         * selects a random forbidden phone number value from list and returns it
+         * @return a random phone number that is forbidden by the system
+         */
+        public static String getRandomForbidden() {
+            int randomIndex = new Random().nextInt(forbidden.length);
+            return forbidden[randomIndex];
+        }
+    }
+
+    public static RegistrationUserData assembleValidRegistrationUserData() {
+        return new RegistrationUserData(
+                TestUserDataRepository.Usernames.getRandomAllowed(),
+                TestUserDataRepository.Passwords.getRandomAllowed(),
+                TestUserDataRepository.PhoneNumbers.getRandomAllowed());
+    }
+
+    public static RegistrationUserData assembleForbiddenRegistrationUserData() {
+        return new RegistrationUserData(
+                TestUserDataRepository.Usernames.getRandomForbidden(),
+                TestUserDataRepository.Passwords.getRandomForbidden(),
+                TestUserDataRepository.PhoneNumbers.getRandomForbidden());
     }
 
 }

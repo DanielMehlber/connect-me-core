@@ -1,6 +1,7 @@
 package org.connectme.core.userManagement.logic;
 
 import org.connectme.core.globalExceptions.ForbiddenInteractionException;
+import org.connectme.core.userManagement.api.RegistrationAPI;
 import org.connectme.core.userManagement.entities.RegistrationUserData;
 import org.connectme.core.userManagement.exceptions.*;
 import org.connectme.core.userManagement.entities.User;
@@ -21,7 +22,7 @@ import java.util.Random;
  *
  * @author Daniel Mehlber
  */
-@Component
+@Component(RegistrationAPI.SESSION_REGISTRATION)
 @SessionScope
 public class StatefulRegistrationBean {
 
@@ -74,11 +75,13 @@ public class StatefulRegistrationBean {
             throw new ForbiddenInteractionException(
                     String.format("registration is in state %s and cannot accept username/password", state.name()));
         else {
+            // perform value check
             try {
                 passedUserData.check();
             } catch (final PasswordTooWeakException | UsernameNotAllowedException reason) {
                 throw new UserDataInsufficientException(reason);
             }
+
             this.passedUserData = passedUserData;
             state = RegistrationState.USER_DATA_PASSED;
         }
@@ -110,7 +113,6 @@ public class StatefulRegistrationBean {
                 this.verificationCode = generateVerificationCode();
                 state = RegistrationState.WAITING_FOR_PHONE_NUMBER_VERIFICATION;
 
-                // TODO: send verification code via SMS (but only if not in testing mode)
             } else {
                 // CASE: not enough time has passed, prohibit another verification attempt
                 throw new RegistrationVerificationNowAllowedException();
@@ -128,7 +130,7 @@ public class StatefulRegistrationBean {
      */
     private boolean isVerificationAttemptCurrentlyAllowed() {
         final LocalDateTime now = LocalDateTime.now();
-        if(verificationAttempts > MAX_AMOUNT_VERIFICATION_ATTEMPTS) {
+        if(verificationAttempts >= MAX_AMOUNT_VERIFICATION_ATTEMPTS) {
             // CASE: max limit for verification attempts was exceeded
             if(lastVerificationAttempt.plusMinutes(BLOCK_FAILED_ATTEMPT_MINUTES).isBefore(now)) {
                 // CASE: enough time has passed, allow more attempts
@@ -165,7 +167,6 @@ public class StatefulRegistrationBean {
      * @return verification code
      */
     private String generateVerificationCode() {
-        // TODO: Is this the best way?
         return String.valueOf(new Random().nextInt(99999));
     }
 

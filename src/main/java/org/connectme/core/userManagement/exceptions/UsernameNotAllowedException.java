@@ -2,7 +2,7 @@ package org.connectme.core.userManagement.exceptions;
 
 public class UsernameNotAllowedException extends Exception{
 
-    public static enum Reason {
+    public enum Reason {
         PROFANITY,
         SYNTAX,
         LENGTH
@@ -15,7 +15,7 @@ public class UsernameNotAllowedException extends Exception{
         /*
          * SECURITY: Do NOT log username, it is raw user input and could be harmful (see Log-Injection).
          */
-        super(String.format("the provided username cannot be accepted. Reason: %s", username, reason.name()));
+        super(String.format("the provided username cannot be accepted. Reason: %s", reason.name()));
         this.username = username;
         this.reason = reason;
     }
