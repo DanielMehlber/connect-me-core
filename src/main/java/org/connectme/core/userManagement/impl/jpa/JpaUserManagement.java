@@ -50,11 +50,27 @@ public class JpaUserManagement implements UserManagement {
 
     @Override
     public void updateUserData(User userdata) throws RuntimeException, InternalErrorException, NoSuchUserException {
-
+        try {
+            if(!userRepository.existsById(userdata.getUsername())) {
+                throw new NoSuchUserException(userdata.getUsername());
+            } else {
+                userRepository.save(userdata);
+            }
+        } catch (RuntimeException e) {
+            throw new InternalErrorException("cannot update user data", e);
+        }
     }
 
     @Override
     public void deleteUser(String username) throws RuntimeException, InternalErrorException, NoSuchUserException {
-
+        try {
+            if(!userRepository.existsById(username)) {
+                throw new NoSuchUserException(username);
+            } else {
+                userRepository.deleteById(username);
+            }
+        } catch (RuntimeException e) {
+            throw new InternalErrorException("cannot delete user", e);
+        }
     }
 }
