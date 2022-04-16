@@ -59,7 +59,7 @@ public class StatefulRegistrationBeanTest {
         statefulRegistrationBean.setUserData(TestUserDataRepository.assembleValidRegistrationUserData());
 
         // exceed max amount of allowed verifications attempts
-        for (int i = 0; i <= StatefulRegistrationBean.MAX_AMOUNT_VERIFICATION_ATTEMPTS; i++) {
+        for (int i = 0; i < StatefulRegistrationBean.MAX_AMOUNT_VERIFICATION_ATTEMPTS; i++) {
             statefulRegistrationBean.startAndWaitForVerification();
             try {
                 statefulRegistrationBean.checkVerificationCode("");
@@ -93,7 +93,7 @@ public class StatefulRegistrationBeanTest {
         statefulRegistrationBean.setUserData(TestUserDataRepository.assembleValidRegistrationUserData());
 
         // exceed max attempt of verifications
-        for (int i = 0; i <= StatefulRegistrationBean.MAX_AMOUNT_VERIFICATION_ATTEMPTS; i++) {
+        for (int i = 0; i < StatefulRegistrationBean.MAX_AMOUNT_VERIFICATION_ATTEMPTS; i++) {
             statefulRegistrationBean.startAndWaitForVerification();
             try {
                 statefulRegistrationBean.checkVerificationCode("");

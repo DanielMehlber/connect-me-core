@@ -226,7 +226,48 @@ public class RegistrationAPITest {
     }
 
     @Test
-    public void exceedVerificationAttempts() {
+    public void exceedVerificationAttempts() throws Exception {
+        /*
+         * SCENARIO: user to exceeds the amount of verification attempts and has to wait.
+         */
+
+        // create mock session (must be passed in client request)
+        MockHttpSession session = new MockHttpSession();
+
+        // 1) init registration
+        client.perform(post("/users/registration/init").session(session)).andExpect(status().isOk());
+
+        // 2) send user registration data
+        final RegistrationUserData userData = TestUserDataRepository.assembleValidRegistrationUserData();
+        String json = new ObjectMapper().writeValueAsString(userData);
+
+        client.perform(post("/users/registration/set/userdata")
+                        .contentType("application/json")
+                        .content(json)
+                        .session(session))
+                .andExpect(status().isOk());
+
+        // 4) exceed the maximum amount of verification attempts
+        for(int i = 0; i < StatefulRegistrationBean.MAX_AMOUNT_VERIFICATION_ATTEMPTS; i++) {
+            // 4.1) start verification process
+            client.perform(post("/users/registration/start/verify")
+                            .session(session))
+                    .andExpect(status().isOk());
+
+            // 4.2) pass wrong verification code
+            client.perform(post("/users/registration/verify")
+                            .contentType("text/plain")
+                            .content("wrong")
+                            .session(session))
+                    .andExpect(status().isBadRequest());
+        }
+
+        // 5) try another time (this should fail because the verification is blocked)
+        client.perform(post("/users/registration/verify")
+                        .contentType("text/plain")
+                        .content("wrong")
+                        .session(session))
+                .andExpect(status().isForbidden());
 
     }
 

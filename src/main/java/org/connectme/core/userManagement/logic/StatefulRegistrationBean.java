@@ -131,7 +131,7 @@ public class StatefulRegistrationBean {
      */
     private boolean isVerificationAttemptCurrentlyAllowed() {
         final LocalDateTime now = LocalDateTime.now();
-        if(verificationAttempts > MAX_AMOUNT_VERIFICATION_ATTEMPTS) {
+        if(verificationAttempts >= MAX_AMOUNT_VERIFICATION_ATTEMPTS) {
             // CASE: max limit for verification attempts was exceeded
             if(lastVerificationAttempt.plusMinutes(BLOCK_FAILED_ATTEMPT_MINUTES).isBefore(now)) {
                 // CASE: enough time has passed, allow more attempts
