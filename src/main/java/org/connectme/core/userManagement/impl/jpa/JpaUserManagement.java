@@ -9,10 +9,12 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Primary;
 import org.springframework.stereotype.Component;
 
+@SuppressWarnings("unused")
 @Component("JpaUserManagement")
 @Primary
 public class JpaUserManagement implements UserManagement {
 
+    @SuppressWarnings("unused")
     @Autowired
     UserRepository userRepository;
 
@@ -26,8 +28,12 @@ public class JpaUserManagement implements UserManagement {
     }
 
     @Override
-    public User fetchUserByUsername(String username) throws RuntimeException, InternalErrorException {
-        return null;
+    public User fetchUserByUsername(String username) throws RuntimeException, InternalErrorException, NoSuchUserException {
+        try {
+            return userRepository.findById(username).orElseThrow(() -> new NoSuchUserException(username));
+        } catch (RuntimeException e) {
+            throw new InternalErrorException("cannot fetch user by id", e);
+        }
     }
 
     @Override

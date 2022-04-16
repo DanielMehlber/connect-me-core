@@ -34,7 +34,7 @@ public interface UserManagement {
      * @throws RuntimeException any unexpected or unhandled errors that must be escalated
      * @throws InternalErrorException possible internal errors e.g. because of database connection
      */
-    User fetchUserByUsername(final String username) throws RuntimeException, InternalErrorException;
+    User fetchUserByUsername(final String username) throws RuntimeException, InternalErrorException, NoSuchUserException;
 
     /**
      * Create new user and persist it

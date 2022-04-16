@@ -8,6 +8,7 @@ import javax.persistence.Id;
 import java.nio.charset.StandardCharsets;
 import java.security.MessageDigest;
 import java.security.NoSuchAlgorithmException;
+import java.util.Objects;
 
 @Entity
 public class User {
@@ -18,6 +19,11 @@ public class User {
     @Column(name = "password")
     private String passwordHash;
 
+    /*
+     * THIS DEFAULT CONSTRUCTOR IS MEANT TO BE PRIVATE
+     * A default constructor is required by JPA.
+     */
+    @SuppressWarnings("unused")
     private User() {}
 
     /**
@@ -36,7 +42,7 @@ public class User {
         }
     }
 
-    private String hash(String password) throws NoSuchAlgorithmException {
+    private static String hash(String password) throws NoSuchAlgorithmException {
         MessageDigest digest = MessageDigest.getInstance("SHA-256");
         byte[] encodedHash = digest.digest(password.getBytes(StandardCharsets.UTF_8));
 
@@ -49,5 +55,18 @@ public class User {
 
     public String getPasswordHash() {
         return passwordHash;
+    }
+
+    @Override
+    public boolean equals(Object o) {
+        if (this == o) return true;
+        if (o == null || getClass() != o.getClass()) return false;
+        User user = (User) o;
+        return Objects.equals(getUsername(), user.getUsername()) && Objects.equals(getPasswordHash(), user.getPasswordHash());
+    }
+
+    @Override
+    public int hashCode() {
+        return Objects.hash(getUsername(), getPasswordHash());
     }
 }

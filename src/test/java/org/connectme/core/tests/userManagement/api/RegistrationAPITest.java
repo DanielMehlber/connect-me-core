@@ -5,8 +5,10 @@ import org.connectme.core.tests.userManagement.testUtil.TestUserDataRepository;
 import org.connectme.core.userManagement.UserManagement;
 import org.connectme.core.userManagement.api.RegistrationAPI;
 import org.connectme.core.userManagement.entities.RegistrationUserData;
+import org.connectme.core.userManagement.entities.User;
 import org.connectme.core.userManagement.impl.jpa.UserRepository;
 import org.connectme.core.userManagement.logic.StatefulRegistrationBean;
+import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -23,12 +25,15 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
 @AutoConfigureMockMvc
 public class RegistrationAPITest {
 
+    @SuppressWarnings("unused")
     @Autowired
     private MockMvc client;
 
+    @SuppressWarnings("unused")
     @Autowired
     private UserManagement userManagement;
 
+    @SuppressWarnings("unused")
     @Autowired
     private UserRepository userRepository;
 
@@ -91,6 +96,10 @@ public class RegistrationAPITest {
                         .content(code)
                         .session(session))
                 .andExpect(status().isOk());
+
+        User createdUser = userManagement.fetchUserByUsername(userData.getUsername());
+        User expectedUser = new User(userData);
+        Assertions.assertEquals(expectedUser, createdUser);
     }
 
     /**
@@ -225,15 +234,12 @@ public class RegistrationAPITest {
 
     }
 
-    @Test
-    public void exceedVerificationAttempts() throws Exception {
-        /*
-         * SCENARIO: user to exceeds the amount of verification attempts and has to wait.
-         */
-
-        // create mock session (must be passed in client request)
-        MockHttpSession session = new MockHttpSession();
-
+    /**
+     * This helper method performs all API calls from init to verification attempts exceeded.
+     * @param session the current session that is being used for registration
+     * @throws Exception errors occurred during this process
+     */
+    private void performUntilVerificationAttemptsExceeded(MockHttpSession session) throws Exception {
         // 1) init registration
         client.perform(post("/users/registration/init").session(session)).andExpect(status().isOk());
 
@@ -247,22 +253,35 @@ public class RegistrationAPITest {
                         .session(session))
                 .andExpect(status().isOk());
 
-        // 4) exceed the maximum amount of verification attempts
+        // 3) exceed the maximum amount of verification attempts
         for(int i = 0; i < StatefulRegistrationBean.MAX_AMOUNT_VERIFICATION_ATTEMPTS; i++) {
-            // 4.1) start verification process
+            // 3.1) start verification process
             client.perform(post("/users/registration/start/verify")
                             .session(session))
                     .andExpect(status().isOk());
 
-            // 4.2) pass wrong verification code
+            // 3.2) pass wrong verification code
             client.perform(post("/users/registration/verify")
                             .contentType("text/plain")
                             .content("wrong")
                             .session(session))
                     .andExpect(status().isBadRequest());
         }
+    }
 
-        // 5) try another time (this should fail because the verification is blocked)
+    @Test
+    public void exceedVerificationAttempts() throws Exception {
+        /*
+         * SCENARIO: user to exceeds the amount of verification attempts and has to wait.
+         */
+
+        // create mock session (must be passed in client request)
+        MockHttpSession session = new MockHttpSession();
+
+        // exceed verification limit => verification block
+        performUntilVerificationAttemptsExceeded(session);
+
+        // try another time (this should fail because the verification is blocked)
         client.perform(post("/users/registration/verify")
                         .contentType("text/plain")
                         .content("wrong")
@@ -272,8 +291,45 @@ public class RegistrationAPITest {
     }
 
     @Test
-    public void attemptInvalidReset() {}
+    public void attemptInvalidReset() throws Exception {
+        /*
+         * SCENARIO: user to exceeds the amount of verification attempts and has to wait, but instead
+         * he tries to reset the registration in order to bypass this behavior. This has to be prevented.
+         */
+
+        // create mock session (must be passed in client request)
+        MockHttpSession session = new MockHttpSession();
+
+        // exceed verification limit => verification block
+        performUntilVerificationAttemptsExceeded(session);
+
+        // attempt to illegally reset registration (is forbidden)
+        client.perform(post("/users/registration/init").session(session))
+                .andExpect(status().isForbidden());
+    }
 
     @Test
-    public void usernameAlreadyTaken() {}
+    public void usernameAlreadyTaken() throws Exception {
+
+        /*
+         * 1) create user in database with username
+         */
+        RegistrationUserData userData = TestUserDataRepository.assembleValidRegistrationUserData();
+        userManagement.createNewUser(new User(userData));
+
+
+        /*
+         * 2) try to create a new user with same username using API
+         */
+        MockHttpSession session = new MockHttpSession();
+
+        String json = new ObjectMapper().writeValueAsString(userData);
+
+        // not allowed interactions
+        client.perform(post("/users/registration/set/userdata")
+                        .content(json)
+                        .contentType("application/json")
+                        .session(session))
+                .andExpect(status().isConflict());
+    }
 }

@@ -113,7 +113,6 @@ public class StatefulRegistrationBean {
                 this.verificationCode = generateVerificationCode();
                 state = RegistrationState.WAITING_FOR_PHONE_NUMBER_VERIFICATION;
 
-                // TODO: send verification code via SMS (but only if not in testing mode)
             } else {
                 // CASE: not enough time has passed, prohibit another verification attempt
                 throw new RegistrationVerificationNowAllowedException();
@@ -168,7 +167,6 @@ public class StatefulRegistrationBean {
      * @return verification code
      */
     private String generateVerificationCode() {
-        // TODO: Is this the best way?
         return String.valueOf(new Random().nextInt(99999));
     }
 
