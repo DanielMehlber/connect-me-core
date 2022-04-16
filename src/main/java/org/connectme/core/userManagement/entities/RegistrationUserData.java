@@ -57,7 +57,7 @@ public class RegistrationUserData {
     }
 
     public void setUsername(String username) {
-        this.username = username;
+        this.username = username.trim();
     }
 
     public String getPassword() {
@@ -65,7 +65,7 @@ public class RegistrationUserData {
     }
 
     public void setPassword(String password) {
-        this.password = password;
+        this.password = password.trim();
     }
 
     public String getPhoneNumber() {
@@ -73,7 +73,7 @@ public class RegistrationUserData {
     }
 
     public void setPhoneNumber(String phoneNumber) {
-        this.phoneNumber = phoneNumber;
+        this.phoneNumber = phoneNumber.trim();
     }
 
     /**
