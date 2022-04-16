@@ -1,11 +1,13 @@
 package org.connectme.core.tests.userManagement.api;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
-import org.connectme.core.tests.userManagement.testUtil.UserDataRepository;
+import org.connectme.core.tests.userManagement.testUtil.TestUserDataRepository;
 import org.connectme.core.userManagement.UserManagement;
 import org.connectme.core.userManagement.api.RegistrationAPI;
 import org.connectme.core.userManagement.entities.RegistrationUserData;
+import org.connectme.core.userManagement.impl.jpa.UserRepository;
 import org.connectme.core.userManagement.logic.StatefulRegistrationBean;
+import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureMockMvc;
@@ -27,6 +29,31 @@ public class RegistrationAPITest {
     @Autowired
     private UserManagement userManagement;
 
+    @Autowired
+    private UserRepository userRepository;
+
+    @BeforeEach
+    public void prepare() {
+        // 1) remove all users from database that may reside in there
+        userRepository.deleteAll();
+    }
+
+    /**
+     * The {@link StatefulRegistrationBean} is stored in session under a specific attribute
+     * name called "scopedTarget.{defined name}". The name of the session attribute is defined
+     * in {@link RegistrationAPI}. Extract the object from the session.
+     *
+     * @param session session in which the bean is placed
+     * @return instance of the {@link StatefulRegistrationBean}
+     */
+    private StatefulRegistrationBean extractRegistrationBeanFromSession(MockHttpSession session) {
+      return (StatefulRegistrationBean) session.getAttribute("scopedTarget."+RegistrationAPI.SESSION_REGISTRATION);
+    }
+
+    /**
+     * Test happy path of registration process (without any complications) via the API.
+     * @throws Exception test failed
+     */
     @Test
     public void happyPath() throws Exception {
 
@@ -41,7 +68,7 @@ public class RegistrationAPITest {
         client.perform(post("/users/registration/init").session(session)).andExpect(status().isOk());
 
         // 2) send user registration data
-        final RegistrationUserData userData = UserDataRepository.assembleValidRegistrationUserData();
+        final RegistrationUserData userData = TestUserDataRepository.assembleValidRegistrationUserData();
         String json = new ObjectMapper().writeValueAsString(userData);
 
         client.perform(post("/users/registration/set/userdata")
@@ -56,7 +83,7 @@ public class RegistrationAPITest {
                 .andExpect(status().isOk());
 
         // 4) pass verification code
-        StatefulRegistrationBean registrationObject = (StatefulRegistrationBean) session.getAttribute(RegistrationAPI.SESSION_REGISTRATION);
+        StatefulRegistrationBean registrationObject = extractRegistrationBeanFromSession(session);
         String code = registrationObject.getVerificationCode();
 
         client.perform(post("/users/registration/verify")
@@ -66,15 +93,146 @@ public class RegistrationAPITest {
                 .andExpect(status().isOk());
     }
 
+    /**
+     * Attempt registration with invalid/forbidden user data (via API)
+     * @throws Exception test failed
+     */
     @Test
-    public void attemptInvalidUserData() {}
+    public void attemptForbiddenUserData() throws Exception {
+        final RegistrationUserData invalidUserData = TestUserDataRepository.assembleForbiddenRegistrationUserData();
+        final String json = new ObjectMapper().writeValueAsString(invalidUserData);
+        MockHttpSession session = new MockHttpSession();
+
+        // 1) init registration
+        client.perform(post("/users/registration/init").session(session)).andExpect(status().isOk());
+
+        // 2) attempt to set forbidden user data (this is not allowed)
+        client.perform(post("/users/registration/set/userdata")
+                        .contentType("application/json")
+                        .content(json)
+                        .session(session))
+                .andExpect(status().isBadRequest());
+
+        // 3) attempt to continue (this is not allowed)
+        client.perform(post("/users/registration/start/verify")
+                        .session(session))
+                .andExpect(status().isForbidden());
+    }
+
+    /**
+     * Test all possibilities of forbidden interactions with the registration process.
+     * @throws Exception test failed
+     */
+    @Test
+    public void attemptIllegalAccess() throws Exception {
+        final RegistrationUserData userData = TestUserDataRepository.assembleValidRegistrationUserData();
+        final String json = new ObjectMapper().writeValueAsString(userData);
+        MockHttpSession session = new MockHttpSession();
+
+        /*
+         * 1) try to call actions without initialized registrations. Only action allowed is registration init
+         * Allowed interactions:
+         * - init
+         * - upload user data
+         */
+        client.perform(post("/users/registration/start/verify").session(session))
+                .andExpect(status().isForbidden());
+        client.perform(post("/users/registration/verify")
+                        .content("code")
+                        .contentType("text/plain")
+                        .session(session))
+                .andExpect(status().isForbidden());
+
+        /*
+         * 2) init registration. Only action allowed is passing user data
+         */
+        // action
+        client.perform(post("/users/registration/init").session(session))
+                .andExpect(status().isOk());
+
+        // not allowed interactions
+        client.perform(post("/users/registration/start/verify").session(session))
+                .andExpect(status().isForbidden());
+        client.perform(post("/users/registration/verify")
+                        .content("code")
+                        .contentType("text/plain")
+                        .session(session))
+                .andExpect(status().isForbidden());
+
+        /*
+         * 3) set user data. Only action allowed is starting the verification process
+         */
+        // action
+        client.perform(post("/users/registration/set/userdata")
+                        .content(json)
+                        .contentType("application/json")
+                        .session(session))
+                .andExpect(status().isOk());
+
+        // not allowed interactions
+        client.perform(post("/users/registration/verify")
+                        .content("code")
+                        .contentType("text/plain")
+                        .session(session))
+                .andExpect(status().isForbidden());
+        client.perform(post("/users/registration/set/userdata")
+                        .content(json)
+                        .contentType("application/json")
+                        .session(session))
+                .andExpect(status().isForbidden());
+
+        /*
+         * 4) start verification process. Only action allowed is passing verification code
+         */
+        // action
+        client.perform(post("/users/registration/start/verify").session(session))
+                .andExpect(status().isOk());
+
+        // not allowed interactions
+        client.perform(post("/users/registration/set/userdata")
+                        .content(json)
+                        .contentType("application/json")
+                        .session(session))
+                .andExpect(status().isForbidden());
+        client.perform(post("/users/registration/start/verify"))
+                .andExpect(status().isForbidden());
+
+        /*
+         * 5) complete verification. No further actions allowed
+         */
+        // action
+        StatefulRegistrationBean registration = extractRegistrationBeanFromSession(session);
+        final String verificationCode = registration.getVerificationCode();
+        client.perform(post("/users/registration/verify")
+                        .content(verificationCode)
+                        .contentType("text/plain")
+                        .session(session))
+                .andExpect(status().isOk());
+
+        // not allowed interactions
+        client.perform(post("/users/registration/set/userdata")
+                        .content(json)
+                        .contentType("application/json")
+                        .session(session))
+                .andExpect(status().isForbidden());
+        client.perform(post("/users/registration/start/verify").session(session))
+                .andExpect(status().isForbidden());
+        client.perform(post("/users/registration/verify")
+                        .content("code")
+                        .contentType("text/plain")
+                        .session(session))
+                .andExpect(status().isForbidden());
+
+    }
 
     @Test
-    public void attemptIllegalAccess() {}
+    public void exceedVerificationAttempts() {
 
-    @Test
-    public void exceedVerificationAttempts() {}
+    }
 
     @Test
     public void attemptInvalidReset() {}
+
+    @Test
+    public void usernameAlreadyTaken() {}
 }

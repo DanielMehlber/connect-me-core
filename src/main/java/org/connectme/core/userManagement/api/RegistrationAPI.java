@@ -1,11 +1,16 @@
 package org.connectme.core.userManagement.api;
 
 import org.connectme.core.globalExceptions.ForbiddenInteractionException;
+import org.connectme.core.globalExceptions.InternalErrorException;
+import org.connectme.core.userManagement.UserManagement;
 import org.connectme.core.userManagement.entities.RegistrationUserData;
+import org.connectme.core.userManagement.entities.User;
 import org.connectme.core.userManagement.exceptions.RegistrationVerificationNowAllowedException;
 import org.connectme.core.userManagement.exceptions.UserDataInsufficientException;
+import org.connectme.core.userManagement.exceptions.UsernameAlreadyTakenException;
 import org.connectme.core.userManagement.exceptions.WrongVerificationCodeException;
 import org.connectme.core.userManagement.logic.StatefulRegistrationBean;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RestController;
@@ -15,7 +20,13 @@ import javax.servlet.http.HttpSession;
 @RestController
 public class RegistrationAPI {
 
+    @Autowired
+    UserManagement userManagement;
+
     public static final String SESSION_REGISTRATION = "session-registration";
+
+    @Autowired
+    private StatefulRegistrationBean registration;
 
     /**
      * The client calls this method in order to init or reset a registration.
@@ -25,7 +36,6 @@ public class RegistrationAPI {
      */
     @PostMapping("/users/registration/init")
     public void initRegistration(HttpSession session) throws ForbiddenInteractionException {
-        StatefulRegistrationBean registration = (StatefulRegistrationBean) session.getAttribute(SESSION_REGISTRATION);
         if(registration == null) {
             // CASE: no existing registration process for this session
             registration = new StatefulRegistrationBean();
@@ -48,14 +58,28 @@ public class RegistrationAPI {
      * @throws UserDataInsufficientException the passed user data cannot be accepted by the system for some reason
      */
     @PostMapping(value="/users/registration/set/userdata", consumes="application/json")
-    public void uploadUserData(HttpSession session, @RequestBody final RegistrationUserData userData) throws ForbiddenInteractionException, UserDataInsufficientException {
-        StatefulRegistrationBean registration = (StatefulRegistrationBean) session.getAttribute(SESSION_REGISTRATION);
+    public void uploadUserData(HttpSession session, @RequestBody final RegistrationUserData userData) throws ForbiddenInteractionException, UserDataInsufficientException, InternalErrorException, UsernameAlreadyTakenException {
         if(registration == null)
             throw new ForbiddenInteractionException("No registration found in session");
 
-        // set user data in session
+        /*
+         * setting user data in session bean (if interaction is even allowed) and checking if it is allowed by the
+         * system (syntax, profanity, ...).
+         *
+         * The availability will be checked in the next step, not here yet.
+         */
         registration.setUserData(userData);
-        //           ^^^^^^^^^^^ may throw ForbiddenInteractionException
+        //           ^^^^^^^^^^^ may throw ForbiddenInteractionException, UsernameAlreadyTakenException
+
+        /*
+         * the availability of the username will be checked here.
+         * It's checked after it is confirmed to be allowed in any other ways on purpose.
+         */
+        if(!userManagement.isUsernameAvailable(userData.getUsername())) {
+            // if user data is invalid, reset to remove user data from registration
+            registration.reset();
+            throw new UsernameAlreadyTakenException(userData.getUsername());
+        }
     }
 
     /**
@@ -67,7 +91,6 @@ public class RegistrationAPI {
      */
     @PostMapping("/users/registration/start/verify")
     public void startVerificationProcess(HttpSession session) throws ForbiddenInteractionException, RegistrationVerificationNowAllowedException {
-        StatefulRegistrationBean registration = (StatefulRegistrationBean) session.getAttribute(SESSION_REGISTRATION);
         if(registration == null)
             throw new ForbiddenInteractionException("No registration found in session");
 
@@ -85,14 +108,20 @@ public class RegistrationAPI {
      * @throws WrongVerificationCodeException the passed verification code is not correct
      */
     @PostMapping(value="/users/registration/verify", consumes="text/plain")
-    public void verifyWithCode(HttpSession session, @RequestBody  final String passedVerificationCode) throws ForbiddenInteractionException, WrongVerificationCodeException {
-        StatefulRegistrationBean registration = (StatefulRegistrationBean) session.getAttribute(SESSION_REGISTRATION);
+    public void verifyWithCode(HttpSession session, @RequestBody final String passedVerificationCode) throws ForbiddenInteractionException, WrongVerificationCodeException, InternalErrorException, UsernameAlreadyTakenException {
         if(registration == null)
             throw new ForbiddenInteractionException("No registration found in session");
 
         // verify using code
         registration.checkVerificationCode(passedVerificationCode);
         //           ^^^^^^^^^^^^^^^^^^^^^ may throw WrongVerificationCodeException
+
+        /*
+         * create user from registration data and persist him in DB
+         */
+        final User newUser = new User(registration.getPassedUserData());
+        userManagement.createNewUser(newUser);
+        //             ^^^^^^^^^^^^^ may throw UsernameAlreadyTakenException
     }
 
 }

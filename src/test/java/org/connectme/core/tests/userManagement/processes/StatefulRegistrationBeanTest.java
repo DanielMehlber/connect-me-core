@@ -1,10 +1,12 @@
 package org.connectme.core.tests.userManagement.processes;
 
 import org.connectme.core.globalExceptions.ForbiddenInteractionException;
-import org.connectme.core.tests.userManagement.testUtil.UserDataRepository;
+import org.connectme.core.globalExceptions.InternalErrorException;
+import org.connectme.core.tests.userManagement.testUtil.TestUserDataRepository;
 import org.connectme.core.userManagement.entities.RegistrationUserData;
 import org.connectme.core.userManagement.exceptions.RegistrationVerificationNowAllowedException;
 import org.connectme.core.userManagement.exceptions.UserDataInsufficientException;
+import org.connectme.core.userManagement.exceptions.UsernameAlreadyTakenException;
 import org.connectme.core.userManagement.exceptions.WrongVerificationCodeException;
 import org.connectme.core.userManagement.logic.StatefulRegistrationBean;
 import org.connectme.core.userManagement.logic.RegistrationState;
@@ -13,19 +15,20 @@ import org.junit.jupiter.api.Test;
 
 import java.time.LocalDateTime;
 
+
 public class StatefulRegistrationBeanTest {
 
     @Test
-    public void happyPath() throws RegistrationVerificationNowAllowedException, WrongVerificationCodeException, ForbiddenInteractionException, UserDataInsufficientException {
+    public void happyPath() throws RegistrationVerificationNowAllowedException, WrongVerificationCodeException, ForbiddenInteractionException, UserDataInsufficientException, InternalErrorException, UsernameAlreadyTakenException {
         /*
          * SCENARIO: go through happy path of registration process
          */
 
-        String username = UserDataRepository.Usernames.getRandomAllowed();
-        String password = UserDataRepository.Passwords.randomAllowed();
+        String username = TestUserDataRepository.Usernames.getRandomAllowed();
+        String password = TestUserDataRepository.Passwords.getRandomAllowed();
         String phoneNumber = "0 000 000000";
 
-        RegistrationUserData userData = new RegistrationUserData(username, password, phoneNumber);
+        RegistrationUserData userData = TestUserDataRepository.assembleValidRegistrationUserData();
 
         StatefulRegistrationBean statefulRegistrationBean = new StatefulRegistrationBean();
 
@@ -43,7 +46,7 @@ public class StatefulRegistrationBeanTest {
     }
 
     @Test
-    public void exceedVerificationLimit() throws RegistrationVerificationNowAllowedException, WrongVerificationCodeException, ForbiddenInteractionException, UserDataInsufficientException {
+    public void exceedVerificationLimit() throws RegistrationVerificationNowAllowedException, WrongVerificationCodeException, ForbiddenInteractionException, UserDataInsufficientException, InternalErrorException, UsernameAlreadyTakenException {
         /*
          * SCENARIO: evil or clumsy user enters wrong verification code too often and has to wait for a certain amount
          * of time. The amount of verification attempts per time has to be limited because SMS costs money.
@@ -53,7 +56,7 @@ public class StatefulRegistrationBeanTest {
 
         StatefulRegistrationBean statefulRegistrationBean = new StatefulRegistrationBean();
 
-        statefulRegistrationBean.setUserData(UserDataRepository.assembleValidRegistrationUserData());
+        statefulRegistrationBean.setUserData(TestUserDataRepository.assembleValidRegistrationUserData());
 
         // exceed max amount of allowed verifications attempts
         for (int i = 0; i <= StatefulRegistrationBean.MAX_AMOUNT_VERIFICATION_ATTEMPTS; i++) {
@@ -76,7 +79,7 @@ public class StatefulRegistrationBeanTest {
     }
 
     @Test
-    public void attemptProcessRestartWhileVerificationBlock() throws RegistrationVerificationNowAllowedException, ForbiddenInteractionException, UserDataInsufficientException {
+    public void attemptProcessRestartWhileVerificationBlock() throws RegistrationVerificationNowAllowedException, ForbiddenInteractionException, UserDataInsufficientException, InternalErrorException, UsernameAlreadyTakenException {
         /*
          * SCENARIO: evil user tries to send infinite verification SMS in order to harm us:
          * After he attempted too many verifications he must wait. To bypass that, he tries to reset the
@@ -87,7 +90,7 @@ public class StatefulRegistrationBeanTest {
 
         StatefulRegistrationBean statefulRegistrationBean = new StatefulRegistrationBean();
 
-        statefulRegistrationBean.setUserData(UserDataRepository.assembleValidRegistrationUserData());
+        statefulRegistrationBean.setUserData(TestUserDataRepository.assembleValidRegistrationUserData());
 
         // exceed max attempt of verifications
         for (int i = 0; i <= StatefulRegistrationBean.MAX_AMOUNT_VERIFICATION_ATTEMPTS; i++) {
@@ -105,14 +108,14 @@ public class StatefulRegistrationBeanTest {
     }
 
     @Test
-    public void attemptIllegalInteractionsToStates() throws WrongVerificationCodeException, RegistrationVerificationNowAllowedException, ForbiddenInteractionException, UserDataInsufficientException {
+    public void attemptIllegalInteractionsToStates() throws WrongVerificationCodeException, RegistrationVerificationNowAllowedException, ForbiddenInteractionException, UserDataInsufficientException, InternalErrorException, UsernameAlreadyTakenException {
         /*
          * SCENARIO: In every state of the registration only certain interactions are allowed.
          *
          * Test that other interactions are not allowed
          */
 
-        RegistrationUserData userData = UserDataRepository.assembleValidRegistrationUserData();
+        RegistrationUserData userData = TestUserDataRepository.assembleValidRegistrationUserData();
 
         // Set state to CREATED, following interactions are not allowed:
         StatefulRegistrationBean statefulRegistrationBean = new StatefulRegistrationBean();

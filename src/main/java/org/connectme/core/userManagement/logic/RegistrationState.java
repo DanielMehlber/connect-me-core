@@ -6,7 +6,7 @@ package org.connectme.core.userManagement.logic;
 public enum RegistrationState {
 
     /**
-     * When created, nothing is set
+     * When created or reset, nothing is set
      */
     CREATED,
 

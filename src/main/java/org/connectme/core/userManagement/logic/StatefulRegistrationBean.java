@@ -1,6 +1,7 @@
 package org.connectme.core.userManagement.logic;
 
 import org.connectme.core.globalExceptions.ForbiddenInteractionException;
+import org.connectme.core.userManagement.api.RegistrationAPI;
 import org.connectme.core.userManagement.entities.RegistrationUserData;
 import org.connectme.core.userManagement.exceptions.*;
 import org.connectme.core.userManagement.entities.User;
@@ -21,7 +22,7 @@ import java.util.Random;
  *
  * @author Daniel Mehlber
  */
-@Component
+@Component(RegistrationAPI.SESSION_REGISTRATION)
 @SessionScope
 public class StatefulRegistrationBean {
 
@@ -74,11 +75,13 @@ public class StatefulRegistrationBean {
             throw new ForbiddenInteractionException(
                     String.format("registration is in state %s and cannot accept username/password", state.name()));
         else {
+            // perform value check
             try {
                 passedUserData.check();
             } catch (final PasswordTooWeakException | UsernameNotAllowedException reason) {
                 throw new UserDataInsufficientException(reason);
             }
+
             this.passedUserData = passedUserData;
             state = RegistrationState.USER_DATA_PASSED;
         }
