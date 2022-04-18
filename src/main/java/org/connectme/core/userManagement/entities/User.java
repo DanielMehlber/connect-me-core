@@ -10,6 +10,9 @@ import java.security.MessageDigest;
 import java.security.NoSuchAlgorithmException;
 import java.util.Objects;
 
+/**
+ * user data as it is stored in the database
+ */
 @Entity
 public class User {
 
@@ -30,7 +33,8 @@ public class User {
      * Creates new User from {@link RegistrationUserData} after registration process
      * has been completed.
      *
-     * @param userdata user data from registration that will be converted
+     * @param userdata user data from registration that will be converted. It will not be checked in this method, you have
+     *                 to call {@link RegistrationUserData#check()} before.
      * @throws InternalErrorException password hashing was not successful
      */
     public User(final RegistrationUserData userdata) throws InternalErrorException {
@@ -41,6 +45,7 @@ public class User {
             throw new InternalErrorException("cannot create hash of password", e);
         }
     }
+
 
     private static String hash(String password) throws NoSuchAlgorithmException {
         MessageDigest digest = MessageDigest.getInstance("SHA-256");

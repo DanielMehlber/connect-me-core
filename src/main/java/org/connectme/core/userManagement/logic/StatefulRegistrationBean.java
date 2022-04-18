@@ -65,10 +65,11 @@ public class StatefulRegistrationBean {
      * PREVIOUS STEP: Registration has been created
      * NEXT STEP: user will enter his phone number
      *
-     * @param passedUserData user data passed by the user himself
+     * @param passedUserData user data passed by the user himself. It will be checked in this step.
      * @throws ForbiddenInteractionException this instance is currently in a different state and awaits different interactions
      * @throws UserDataInsufficientException the user data was checked and declared insufficient or invalid
      * @author Daniel Mehlber
+     * @see RegistrationUserData#check()
      */
     public void setUserData(final RegistrationUserData passedUserData) throws ForbiddenInteractionException, UserDataInsufficientException {
         if(state != RegistrationState.CREATED)
@@ -93,15 +94,17 @@ public class StatefulRegistrationBean {
      * This state generates and sets the verification code.
      *
      * PREVIOUS STEPS:
-     *  - phone number has been set (first attempt)
-     *  - previous verification has failed (new attempt)
+     * - phone number has been set (first attempt)
+     * - previous verification has failed (new attempt)
+     *
      * NEXT STEP : user has entered verification code, check it
      *
      * @throws ForbiddenInteractionException this instance is currently in a different state and awaits different interactions
-     * @throws RegistrationVerificationNowAllowedException another registration is currently not allowed
+     * @throws VerificationAttemptNotAllowedException another registration is currently not allowed
      * @author Daniel Mehlber
+     * @see StatefulRegistrationBean#isVerificationAttemptCurrentlyAllowed()
      */
-    public void startAndWaitForVerification() throws ForbiddenInteractionException, RegistrationVerificationNowAllowedException {
+    public void startAndWaitForVerification() throws ForbiddenInteractionException, VerificationAttemptNotAllowedException {
         if (state != RegistrationState.USER_DATA_PASSED)
             throw new ForbiddenInteractionException(
                     String.format("registration is in state %s and cannot wait for phone number verification", state.name()));
@@ -115,7 +118,7 @@ public class StatefulRegistrationBean {
 
             } else {
                 // CASE: not enough time has passed, prohibit another verification attempt
-                throw new RegistrationVerificationNowAllowedException();
+                throw new VerificationAttemptNotAllowedException();
             }
 
         }
@@ -215,6 +218,7 @@ public class StatefulRegistrationBean {
      *
      * @throws ForbiddenInteractionException cannot reset registration object right now.
      * @author Daniel Mehlber
+     * @see StatefulRegistrationBean#isResetAllowed()
      */
     public void reset() throws ForbiddenInteractionException {
         if(isResetAllowed()) {

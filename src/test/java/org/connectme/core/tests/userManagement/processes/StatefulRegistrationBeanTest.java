@@ -3,7 +3,7 @@ package org.connectme.core.tests.userManagement.processes;
 import org.connectme.core.globalExceptions.ForbiddenInteractionException;
 import org.connectme.core.tests.userManagement.testUtil.TestUserDataRepository;
 import org.connectme.core.userManagement.entities.RegistrationUserData;
-import org.connectme.core.userManagement.exceptions.RegistrationVerificationNowAllowedException;
+import org.connectme.core.userManagement.exceptions.VerificationAttemptNotAllowedException;
 import org.connectme.core.userManagement.exceptions.UserDataInsufficientException;
 import org.connectme.core.userManagement.exceptions.WrongVerificationCodeException;
 import org.connectme.core.userManagement.logic.StatefulRegistrationBean;
@@ -17,7 +17,7 @@ import java.time.LocalDateTime;
 public class StatefulRegistrationBeanTest {
 
     @Test
-    public void happyPath() throws RegistrationVerificationNowAllowedException, WrongVerificationCodeException, ForbiddenInteractionException, UserDataInsufficientException {
+    public void happyPath() throws VerificationAttemptNotAllowedException, WrongVerificationCodeException, ForbiddenInteractionException, UserDataInsufficientException {
         /*
          * SCENARIO: go through happy path of registration process
          */
@@ -40,7 +40,7 @@ public class StatefulRegistrationBeanTest {
     }
 
     @Test
-    public void exceedVerificationLimit() throws RegistrationVerificationNowAllowedException, WrongVerificationCodeException, ForbiddenInteractionException, UserDataInsufficientException {
+    public void exceedVerificationLimit() throws VerificationAttemptNotAllowedException, WrongVerificationCodeException, ForbiddenInteractionException, UserDataInsufficientException {
         /*
          * SCENARIO: evil or clumsy user enters wrong verification code too often and has to wait for a certain amount
          * of time. The amount of verification attempts per time has to be limited because SMS costs money.
@@ -61,7 +61,7 @@ public class StatefulRegistrationBeanTest {
         }
 
         // attempt another verification right away and expect exception
-        Assertions.assertThrows(RegistrationVerificationNowAllowedException.class, statefulRegistrationBean::startAndWaitForVerification);
+        Assertions.assertThrows(VerificationAttemptNotAllowedException.class, statefulRegistrationBean::startAndWaitForVerification);
 
         // reduce time to wait in order to complete unit test faster
         statefulRegistrationBean.setLastVerificationAttempt(LocalDateTime.now().minusMinutes(StatefulRegistrationBean.BLOCK_FAILED_ATTEMPT_MINUTES));
@@ -73,7 +73,7 @@ public class StatefulRegistrationBeanTest {
     }
 
     @Test
-    public void attemptProcessRestartWhileVerificationBlock() throws RegistrationVerificationNowAllowedException, ForbiddenInteractionException, UserDataInsufficientException {
+    public void attemptProcessRestartWhileVerificationBlock() throws VerificationAttemptNotAllowedException, ForbiddenInteractionException, UserDataInsufficientException {
         /*
          * SCENARIO: evil user tries to send infinite verification SMS in order to harm us:
          * After he attempted too many verifications he must wait. To bypass that, he tries to reset the
@@ -95,14 +95,14 @@ public class StatefulRegistrationBeanTest {
         }
 
         // attempt another verification right away and expect exception
-        Assertions.assertThrows(RegistrationVerificationNowAllowedException.class, statefulRegistrationBean::startAndWaitForVerification);
+        Assertions.assertThrows(VerificationAttemptNotAllowedException.class, statefulRegistrationBean::startAndWaitForVerification);
 
         // try to reset registration in order to illegally bypass blocked time. Must be interrupted by exception.
         Assertions.assertThrows(ForbiddenInteractionException.class, statefulRegistrationBean::reset);
     }
 
     @Test
-    public void attemptIllegalInteractionsToStates() throws WrongVerificationCodeException, RegistrationVerificationNowAllowedException, ForbiddenInteractionException, UserDataInsufficientException {
+    public void attemptIllegalInteractionsToStates() throws WrongVerificationCodeException, VerificationAttemptNotAllowedException, ForbiddenInteractionException, UserDataInsufficientException {
         /*
          * SCENARIO: In every state of the registration only certain interactions are allowed.
          *

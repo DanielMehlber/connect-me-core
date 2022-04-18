@@ -5,7 +5,7 @@ import org.connectme.core.globalExceptions.InternalErrorException;
 import org.connectme.core.userManagement.UserManagement;
 import org.connectme.core.userManagement.entities.RegistrationUserData;
 import org.connectme.core.userManagement.entities.User;
-import org.connectme.core.userManagement.exceptions.RegistrationVerificationNowAllowedException;
+import org.connectme.core.userManagement.exceptions.VerificationAttemptNotAllowedException;
 import org.connectme.core.userManagement.exceptions.UserDataInsufficientException;
 import org.connectme.core.userManagement.exceptions.UsernameAlreadyTakenException;
 import org.connectme.core.userManagement.exceptions.WrongVerificationCodeException;
@@ -66,13 +66,13 @@ public class RegistrationAPI {
      * The client calls this method in order to start the verification process and receive a verification code
      *
      * @throws ForbiddenInteractionException               this call is not allowed at the present moment
-     * @throws RegistrationVerificationNowAllowedException a verification attempt is not allowed to the present moment
+     * @throws VerificationAttemptNotAllowedException a verification attempt is not allowed to the present moment
      */
     @PostMapping("/users/registration/start/verify")
-    public void startVerificationProcess() throws ForbiddenInteractionException, RegistrationVerificationNowAllowedException {
+    public void startVerificationProcess() throws ForbiddenInteractionException, VerificationAttemptNotAllowedException {
         // start verification process
         registration.startAndWaitForVerification();
-        //           ^^^^^^^^^^^^^^^^^^^^^^^^^^^ may throw ForbiddenInteractionException, RegistrationVerificationNowAllowedException
+        //           ^^^^^^^^^^^^^^^^^^^^^^^^^^^ may throw ForbiddenInteractionException, VerificationAttemptNotAllowedException
 
         // TODO: send verification code via SMS (but only if not in testing mode)
     }

@@ -9,8 +9,10 @@ import org.connectme.core.userManagement.exceptions.UsernameNotAllowedException;
 import java.util.Objects;
 
 /**
- * This class contains all user data passed by the user himself mid-registration.
- * When any setter is accessed, the data is automatically checked. This is because the user cannot be trusted.
+ * Contains all user data passed by the user himself during the registration process.
+ * It also provides various checks for the untrustworthy user input that must be checked before use.
+ *
+ * The instance of this class can be converted to a {@link User} instance via its constructor.
  */
 @JsonInclude(JsonInclude.Include.NON_NULL)
 public class RegistrationUserData {
@@ -89,7 +91,9 @@ public class RegistrationUserData {
     }
 
     /**
-     * Takes the passed username and checks if it's a valid username that can be accepted by the system
+     * Takes the passed username and checks if it's a valid username that can be accepted by the system.
+     * A usernames can be {@value MIN_USERNAME_LENGTH} - {@value MAX_USERNAME_LENGTH} characters long and allows only a
+     * certain subset of characters.
      *
      * @param passedUsername username to check
      * @throws UsernameNotAllowedException the username is not allowed and must not be accepted by the system
@@ -105,7 +109,8 @@ public class RegistrationUserData {
     }
 
     /**
-     * Takes the passed password and checks if it's a valid password that can be accepted by the system
+     * Takes the passed password and checks if it's a valid password that can be accepted by the system.
+     * It needs at least {@value MIN_PASSWORD_LENGTH} characters, 3 digits and must not contain the username.
      *
      * @param passedPassword the password that needs to be checked
      * @param username username that is not allowed to be contained in password
