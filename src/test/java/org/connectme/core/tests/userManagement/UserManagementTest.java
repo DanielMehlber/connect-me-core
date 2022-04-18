@@ -15,6 +15,7 @@ import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
 
+@SuppressWarnings("unused")
 @SpringBootTest
 public class UserManagementTest {
 
@@ -87,14 +88,44 @@ public class UserManagementTest {
         RegistrationUserData originalUserData = TestUserDataRepository.assembleValidRegistrationUserData();
         User user = new User(originalUserData);
 
+        // make sure that the username is available at first
         Assertions.assertTrue(userManagement.isUsernameAvailable(user.getUsername()));
 
         // persist new user
         userManagement.createNewUser(user);
 
+        // make sure that the username is now not available
         Assertions.assertFalse(userManagement.isUsernameAvailable(user.getUsername()));
     }
 
+    @Test
+    public void attemptDeleteUnknownUser() throws InternalErrorException {
+        /*
+         * cannot delete user that does not exist. Exception is expected
+         */
+        String username = TestUserDataRepository.Usernames.getRandomAllowed();
+        Assertions.assertTrue(userManagement.isUsernameAvailable(username));
+        Assertions.assertThrows(NoSuchUserException.class, () -> userManagement.deleteUser(username));
+    }
 
-    // TODO: add more tests for interactions with users that do not exist
+    @Test
+    public void attemptCreateUserWithTakenUsername() throws InternalErrorException, UsernameAlreadyTakenException {
+        RegistrationUserData userData = TestUserDataRepository.assembleValidRegistrationUserData();
+        User user = new User(userData);
+
+        // create user with username once
+        userManagement.createNewUser(user);
+
+        // create user with username twice, expecting exception
+        Assertions.assertThrows(UsernameAlreadyTakenException.class, () -> userManagement.createNewUser(user));
+    }
+
+    @Test
+    public void attemptUpdateUnknownUser() throws InternalErrorException {
+        RegistrationUserData userData = TestUserDataRepository.assembleValidRegistrationUserData();
+        User user = new User(userData);
+
+        // user does not exist, expecting exception
+        Assertions.assertThrows(NoSuchUserException.class, () -> userManagement.updateUserData(user));
+    }
 }

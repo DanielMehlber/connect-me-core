@@ -82,8 +82,10 @@ public class RegistrationUserDataTest {
      */
     @Test
     public void attemptPasswordSameAsUsername() {
+        String username = TestUserDataRepository.Passwords.getRandomAllowed();
+        String password = "abc" + username + "xyz";
         Assertions.assertThrows(PasswordTooWeakException.class,
-                () -> RegistrationUserData.checkPasswordValue("owurwoedaniel2sdfsdf", "daniel"));
+                () -> RegistrationUserData.checkPasswordValue(password, username));
     }
 
 }
