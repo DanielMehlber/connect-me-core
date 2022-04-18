@@ -34,21 +34,13 @@ public class RegistrationAPI {
      */
     @PostMapping("/users/registration/init")
     public void initRegistration() throws ForbiddenInteractionException {
-        if(registration == null) {
-            // CASE: no existing registration process for this session
-            registration = new StatefulRegistrationBean();
-        } else {
-            // CASE: registration process already exists for this session
-            registration.reset();
-            //           ^^^^^ may throw ForbiddenInteractionException if reset is not allowed
-        }
+        registration.reset();
+        //           ^^^^^ may throw ForbiddenInteractionException if reset is not allowed
     }
 
 
     @PostMapping(value="/users/registration/set/userdata", consumes="application/json")
     public void uploadUserData(@RequestBody final RegistrationUserData userData) throws ForbiddenInteractionException, UserDataInsufficientException, InternalErrorException, UsernameAlreadyTakenException {
-        if(registration == null)
-            throw new ForbiddenInteractionException("No registration found in session");
 
         /*
          * setting user data in session bean (if interaction is even allowed) and checking if it is allowed by the
@@ -66,7 +58,7 @@ public class RegistrationAPI {
         if(!userManagement.isUsernameAvailable(userData.getUsername())) {
             // if user data is invalid, reset to remove user data from registration
             registration.reset();
-            throw new UsernameAlreadyTakenException(userData.getUsername());
+            throw new UsernameAlreadyTakenException();
         }
     }
 
@@ -78,9 +70,6 @@ public class RegistrationAPI {
      */
     @PostMapping("/users/registration/start/verify")
     public void startVerificationProcess() throws ForbiddenInteractionException, RegistrationVerificationNowAllowedException {
-        if(registration == null)
-            throw new ForbiddenInteractionException("No registration found in session");
-
         // start verification process
         registration.startAndWaitForVerification();
         //           ^^^^^^^^^^^^^^^^^^^^^^^^^^^ may throw ForbiddenInteractionException, RegistrationVerificationNowAllowedException
@@ -97,9 +86,6 @@ public class RegistrationAPI {
      */
     @PostMapping(value="/users/registration/verify", consumes="text/plain")
     public void verifyWithCode(@RequestBody final String passedVerificationCode) throws ForbiddenInteractionException, WrongVerificationCodeException, InternalErrorException, UsernameAlreadyTakenException {
-        if(registration == null)
-            throw new ForbiddenInteractionException("No registration found in session");
-
         // verify using code
         registration.checkVerificationCode(passedVerificationCode);
         //           ^^^^^^^^^^^^^^^^^^^^^ may throw WrongVerificationCodeException

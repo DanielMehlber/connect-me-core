@@ -30,7 +30,7 @@ public class JpaUserManagement implements UserManagement {
     @Override
     public User fetchUserByUsername(String username) throws RuntimeException, InternalErrorException, NoSuchUserException {
         try {
-            return userRepository.findById(username).orElseThrow(() -> new NoSuchUserException(username));
+            return userRepository.findById(username).orElseThrow(() -> new NoSuchUserException());
         } catch (RuntimeException e) {
             throw new InternalErrorException("cannot fetch user by id", e);
         }
@@ -40,7 +40,7 @@ public class JpaUserManagement implements UserManagement {
     public void createNewUser(User userdata) throws RuntimeException, InternalErrorException, UsernameAlreadyTakenException {
         try {
             if (userRepository.existsById(userdata.getUsername()))
-                throw new UsernameAlreadyTakenException(userdata.getUsername());
+                throw new UsernameAlreadyTakenException();
             else
                 userRepository.save(userdata);
         } catch (RuntimeException e) {
@@ -52,7 +52,7 @@ public class JpaUserManagement implements UserManagement {
     public void updateUserData(User userdata) throws RuntimeException, InternalErrorException, NoSuchUserException {
         try {
             if(!userRepository.existsById(userdata.getUsername())) {
-                throw new NoSuchUserException(userdata.getUsername());
+                throw new NoSuchUserException();
             } else {
                 userRepository.save(userdata);
             }
@@ -65,7 +65,7 @@ public class JpaUserManagement implements UserManagement {
     public void deleteUser(String username) throws RuntimeException, InternalErrorException, NoSuchUserException {
         try {
             if(!userRepository.existsById(username)) {
-                throw new NoSuchUserException(username);
+                throw new NoSuchUserException();
             } else {
                 userRepository.deleteById(username);
             }

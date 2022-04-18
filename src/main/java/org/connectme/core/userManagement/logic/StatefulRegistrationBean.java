@@ -200,7 +200,7 @@ public class StatefulRegistrationBean {
             } else {
                 // CASE: wrong verification code, user must reenter verification process
                 state = RegistrationState.USER_DATA_PASSED;
-                throw new WrongVerificationCodeException(passedVerificationCode);
+                throw new WrongVerificationCodeException();
             }
         }
 

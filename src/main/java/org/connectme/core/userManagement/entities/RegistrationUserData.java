@@ -96,10 +96,10 @@ public class RegistrationUserData {
      */
     public static void checkUsernameValue(final String passedUsername) throws UsernameNotAllowedException {
         if(passedUsername.length() > MAX_USERNAME_LENGTH || passedUsername.length() < MIN_USERNAME_LENGTH)
-            throw new UsernameNotAllowedException(passedUsername, UsernameNotAllowedException.Reason.LENGTH);
+            throw new UsernameNotAllowedException(UsernameNotAllowedException.Reason.LENGTH);
         else if (!passedUsername.matches("^[a-zA-Z0-9-_]*$"))
             //                                  ^^^^^^^^^^^^^^^^ allow only A-Z, a-z, 0-9, -_
-            throw new UsernameNotAllowedException(passedUsername, UsernameNotAllowedException.Reason.SYNTAX);
+            throw new UsernameNotAllowedException(UsernameNotAllowedException.Reason.SYNTAX);
 
         // TODO: Profanity Check
     }
@@ -152,8 +152,4 @@ public class RegistrationUserData {
         return Objects.equals(getUsername(), that.getUsername()) && Objects.equals(getPassword(), that.getPassword()) && Objects.equals(getPhoneNumber(), that.getPhoneNumber());
     }
 
-    @Override
-    public int hashCode() {
-        return Objects.hash(getUsername(), getPassword(), getPhoneNumber());
-    }
 }

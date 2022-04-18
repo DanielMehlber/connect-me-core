@@ -10,17 +10,11 @@ import org.springframework.web.bind.annotation.ResponseStatus;
 @ResponseStatus(HttpStatus.UNAUTHORIZED)
 public class NoSuchUserException extends Exception {
 
-    private final String username;
-
-    public NoSuchUserException(final String username) {
+    public NoSuchUserException() {
         /*
          * SECURITY: Do NOT log username, it is raw user input and could be harmful (see Log-Injection)
          */
         super("requested user with passed username does not exist");
-        this.username = username;
     }
 
-    public String getUsername() {
-        return username;
-    }
 }

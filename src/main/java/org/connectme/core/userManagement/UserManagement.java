@@ -4,16 +4,11 @@ import org.connectme.core.globalExceptions.InternalErrorException;
 import org.connectme.core.userManagement.entities.User;
 import org.connectme.core.userManagement.exceptions.NoSuchUserException;
 import org.connectme.core.userManagement.exceptions.UsernameAlreadyTakenException;
-import org.connectme.core.userManagement.impl.jpa.JpaUserManagement;
 
 /**
  * This interface defines all actions considered user management that need to be accessed by APIs or components
  */
 public interface UserManagement {
-
-    default UserManagement newInstance() {
-        return new JpaUserManagement();
-    }
 
     /**
      * Checks if username is currently available at the present moment.

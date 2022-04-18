@@ -9,20 +9,10 @@ import org.springframework.web.bind.annotation.ResponseStatus;
 @ResponseStatus(HttpStatus.CONFLICT)
 public class UsernameAlreadyTakenException extends Exception {
 
-    /**
-     * Unavailable username
-     */
-    private final String username;
-
-    public UsernameAlreadyTakenException(final String username) {
+    public UsernameAlreadyTakenException() {
         /*
          * Do NOT log username, it is raw user input and could be harmful (see Log-Injection)
          */
         super("The passed username is already taken");
-        this.username = username;
-    }
-
-    public String getUsername() {
-        return username;
     }
 }

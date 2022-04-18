@@ -65,8 +65,4 @@ public class User {
         return Objects.equals(getUsername(), user.getUsername()) && Objects.equals(getPasswordHash(), user.getPasswordHash());
     }
 
-    @Override
-    public int hashCode() {
-        return Objects.hash(getUsername(), getPasswordHash());
-    }
 }
