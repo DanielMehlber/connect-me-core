@@ -1,6 +1,9 @@
 package org.connectme.core.userManagement.entities;
 
 import org.connectme.core.globalExceptions.InternalErrorException;
+import org.hibernate.annotations.CreationTimestamp;
+import org.hibernate.annotations.UpdateTimestamp;
+import org.springframework.data.geo.Point;
 
 import javax.persistence.Column;
 import javax.persistence.Entity;
@@ -8,6 +11,7 @@ import javax.persistence.Id;
 import java.nio.charset.StandardCharsets;
 import java.security.MessageDigest;
 import java.security.NoSuchAlgorithmException;
+import java.time.LocalDateTime;
 import java.util.Objects;
 
 /**
@@ -19,8 +23,25 @@ public class User {
     @Id @Column(name = "username")
     private String username;
 
-    @Column(name = "password")
+    @Column(name = "password_hash")
     private String passwordHash;
+
+    @Column(name = "phone_number")
+    private String phoneNumber;
+
+    @Column(name = "auth_token")
+    private String authToken;
+
+    @Column(name = "current_location")
+    private Point currentLocation;
+
+    @Column(name = "CREATED_ON")
+    @CreationTimestamp
+    private LocalDateTime createdOn;
+
+    @Column(name = "LAST_UPDATE_ON")
+    @UpdateTimestamp
+    private LocalDateTime updatedOn;
 
     /*
      * THIS DEFAULT CONSTRUCTOR IS MEANT TO BE PRIVATE
@@ -39,6 +60,7 @@ public class User {
      */
     public User(final RegistrationUserData userdata) throws InternalErrorException {
         this.username = userdata.getUsername();
+        this.phoneNumber = userdata.getPhoneNumber();
         try {
             this.passwordHash = hash(userdata.getPassword());
         } catch (NoSuchAlgorithmException e) {
