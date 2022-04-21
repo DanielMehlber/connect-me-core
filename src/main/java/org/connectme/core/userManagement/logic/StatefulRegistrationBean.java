@@ -74,12 +74,12 @@ public class StatefulRegistrationBean {
     public void setUserData(final RegistrationUserData passedUserData) throws ForbiddenInteractionException, UserDataInsufficientException {
         if(state != RegistrationState.CREATED)
             throw new ForbiddenInteractionException(
-                    String.format("registration is in state %s and cannot accept username/password", state.name()));
+                    String.format("registration is in state %s and cannot accept user data", state.name()));
         else {
             // perform value check
             try {
                 passedUserData.check();
-            } catch (final PasswordTooWeakException | UsernameNotAllowedException reason) {
+            } catch (final PasswordTooWeakException | UsernameNotAllowedException | PhoneNumberInvalidException reason) {
                 throw new UserDataInsufficientException(reason);
             }
 

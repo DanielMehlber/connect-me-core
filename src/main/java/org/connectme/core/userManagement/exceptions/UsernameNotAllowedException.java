@@ -12,6 +12,6 @@ public class UsernameNotAllowedException extends Exception{
         /*
          * SECURITY: Do NOT log username, it is raw user input and could be harmful (see Log-Injection).
          */
-        super(String.format("the provided username cannot be accepted. Reason: %s", reason.name()));
+        super(String.format("the provided username cannot be accepted: %s", reason.name()));
     }
 }

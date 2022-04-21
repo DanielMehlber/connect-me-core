@@ -4,6 +4,7 @@ import com.fasterxml.jackson.annotation.JsonCreator;
 import com.fasterxml.jackson.annotation.JsonInclude;
 import com.fasterxml.jackson.annotation.JsonProperty;
 import org.connectme.core.userManagement.exceptions.PasswordTooWeakException;
+import org.connectme.core.userManagement.exceptions.PhoneNumberInvalidException;
 import org.connectme.core.userManagement.exceptions.UsernameNotAllowedException;
 
 import java.util.Objects;
@@ -75,7 +76,7 @@ public class RegistrationUserData {
     }
 
     public void setPhoneNumber(String phoneNumber) {
-        this.phoneNumber = phoneNumber.trim();
+        this.phoneNumber = phoneNumber.trim().replace(" ", "");
     }
 
     /**
@@ -84,10 +85,10 @@ public class RegistrationUserData {
      * @throws PasswordTooWeakException the provided password is not strong enough
      * @throws UsernameNotAllowedException the username is forbidden for various reasons
      */
-    public void check() throws PasswordTooWeakException, UsernameNotAllowedException {
+    public void check() throws PasswordTooWeakException, UsernameNotAllowedException, PhoneNumberInvalidException {
         checkUsernameValue(this.username);
         checkPasswordValue(this.password, this.username);
-        // TODO: check phone number value
+        checkPhoneNumber(this.phoneNumber);
     }
 
     /**
@@ -129,7 +130,7 @@ public class RegistrationUserData {
          * at least MIN_PASSWORD_LENGTH amount of characters
          */
         if(passedPassword.length() < MIN_PASSWORD_LENGTH)
-            throw new PasswordTooWeakException();
+            throw new PasswordTooWeakException("password is too short");
 
         /*
          * count digits and check if there are more than 2
@@ -140,13 +141,21 @@ public class RegistrationUserData {
                 digits++;
         }
         if(digits < 3)
-            throw new PasswordTooWeakException();
+            throw new PasswordTooWeakException("password has too few digits");
 
         /*
          * make sure that username is not part of the password
          */
         if(passedPassword.contains(username))
-            throw new PasswordTooWeakException();
+            throw new PasswordTooWeakException("password contains username");
+    }
+
+    private static void checkPhoneNumber(final String phoneNumber) throws PhoneNumberInvalidException {
+        if(phoneNumber.length() > 15)
+            throw new PhoneNumberInvalidException("phone number is too long");
+
+        if(!phoneNumber.matches("^\\d+$"))
+            throw new PhoneNumberInvalidException("phone number does not only contain digits");
     }
 
     @Override

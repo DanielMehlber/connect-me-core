@@ -6,8 +6,8 @@ package org.connectme.core.userManagement.exceptions;
  */
 public class PasswordTooWeakException extends Exception {
 
-    public PasswordTooWeakException() {
-        super("the password provided is not strong enough and was rejected");
+    public PasswordTooWeakException(final String reason) {
+        super("the password provided is not strong enough and was rejected: " + reason);
     }
 
 }
