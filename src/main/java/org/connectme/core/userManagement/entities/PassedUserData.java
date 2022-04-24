@@ -16,7 +16,7 @@ import java.util.Objects;
  * The instance of this class can be converted to a {@link User} instance via its constructor.
  */
 @JsonInclude(JsonInclude.Include.NON_NULL)
-public class RegistrationUserData {
+public class PassedUserData {
 
     /** username suggestion of user (will not be reserved) */
     private String username;
@@ -38,7 +38,7 @@ public class RegistrationUserData {
      * public access is prohibited.
      */
     @SuppressWarnings("unused")
-    private RegistrationUserData() {}
+    private PassedUserData() {}
 
     /**
      * This constructor is used to deserialize the JSON string passed by the user.
@@ -47,9 +47,9 @@ public class RegistrationUserData {
      * @param phoneNumber phoneNumber of user (unchecked)
      */
     @JsonCreator
-    public RegistrationUserData(@JsonProperty(value = "username", required = true) final String username,
-                                @JsonProperty(value = "password", required = true) final String password,
-                                @JsonProperty(value = "phoneNumber", required = true) final String phoneNumber) {
+    public PassedUserData(@JsonProperty(value = "username", required = true) final String username,
+                          @JsonProperty(value = "password", required = true) final String password,
+                          @JsonProperty(value = "phoneNumber", required = true) final String phoneNumber) {
         setUsername(username);
         setPassword(password);
         setPhoneNumber(phoneNumber);
@@ -162,7 +162,7 @@ public class RegistrationUserData {
     public boolean equals(Object o) {
         if (this == o) return true;
         if (o == null || getClass() != o.getClass()) return false;
-        RegistrationUserData that = (RegistrationUserData) o;
+        PassedUserData that = (PassedUserData) o;
         return Objects.equals(getUsername(), that.getUsername()) && Objects.equals(getPassword(), that.getPassword()) && Objects.equals(getPhoneNumber(), that.getPhoneNumber());
     }
 

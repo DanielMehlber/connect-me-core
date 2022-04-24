@@ -51,14 +51,14 @@ public class User {
     private User() {}
 
     /**
-     * Creates new User from {@link RegistrationUserData} after registration process
+     * Creates new User from {@link PassedUserData} after registration process
      * has been completed.
      *
      * @param userdata user data from registration that will be converted. It will not be checked in this method, you have
-     *                 to call {@link RegistrationUserData#check()} before.
+     *                 to call {@link PassedUserData#check()} before.
      * @throws InternalErrorException password hashing was not successful
      */
-    public User(final RegistrationUserData userdata) throws InternalErrorException {
+    public User(final PassedUserData userdata) throws InternalErrorException {
         this.username = userdata.getUsername();
         this.phoneNumber = userdata.getPhoneNumber();
         try {

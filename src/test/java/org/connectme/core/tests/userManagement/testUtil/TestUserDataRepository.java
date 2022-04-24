@@ -1,6 +1,6 @@
 package org.connectme.core.tests.userManagement.testUtil;
 
-import org.connectme.core.userManagement.entities.RegistrationUserData;
+import org.connectme.core.userManagement.entities.PassedUserData;
 
 import java.util.Random;
 
@@ -121,15 +121,15 @@ public class TestUserDataRepository {
         }
     }
 
-    public static RegistrationUserData assembleValidRegistrationUserData() {
-        return new RegistrationUserData(
+    public static PassedUserData assembleValidRegistrationUserData() {
+        return new PassedUserData(
                 TestUserDataRepository.Usernames.getRandomAllowed(),
                 TestUserDataRepository.Passwords.getRandomAllowed(),
                 TestUserDataRepository.PhoneNumbers.getRandomAllowed());
     }
 
-    public static RegistrationUserData assembleForbiddenRegistrationUserData() {
-        return new RegistrationUserData(
+    public static PassedUserData assembleForbiddenRegistrationUserData() {
+        return new PassedUserData(
                 TestUserDataRepository.Usernames.getRandomForbidden(),
                 TestUserDataRepository.Passwords.getRandomForbidden(),
                 TestUserDataRepository.PhoneNumbers.getRandomForbidden());

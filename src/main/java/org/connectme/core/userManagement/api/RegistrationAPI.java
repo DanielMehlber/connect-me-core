@@ -3,7 +3,7 @@ package org.connectme.core.userManagement.api;
 import org.connectme.core.globalExceptions.ForbiddenInteractionException;
 import org.connectme.core.globalExceptions.InternalErrorException;
 import org.connectme.core.userManagement.UserManagement;
-import org.connectme.core.userManagement.entities.RegistrationUserData;
+import org.connectme.core.userManagement.entities.PassedUserData;
 import org.connectme.core.userManagement.entities.User;
 import org.connectme.core.userManagement.exceptions.VerificationAttemptNotAllowedException;
 import org.connectme.core.userManagement.exceptions.UserDataInsufficientException;
@@ -40,7 +40,7 @@ public class RegistrationAPI {
 
 
     @PostMapping(value="/users/registration/set/userdata", consumes="application/json")
-    public void uploadUserData(@RequestBody final RegistrationUserData userData) throws ForbiddenInteractionException, UserDataInsufficientException, InternalErrorException, UsernameAlreadyTakenException {
+    public void uploadUserData(@RequestBody final PassedUserData userData) throws ForbiddenInteractionException, UserDataInsufficientException, InternalErrorException, UsernameAlreadyTakenException {
 
         /*
          * setting user data in session bean (if interaction is even allowed) and checking if it is allowed by the
@@ -73,8 +73,6 @@ public class RegistrationAPI {
         // start verification process
         registration.startAndWaitForVerification();
         //           ^^^^^^^^^^^^^^^^^^^^^^^^^^^ may throw ForbiddenInteractionException, VerificationAttemptNotAllowedException
-
-        // TODO: send verification code via SMS (but only if not in testing mode)
     }
 
     /**
