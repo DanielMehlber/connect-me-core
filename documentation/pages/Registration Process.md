@@ -19,7 +19,7 @@
 		- Ends statefulRegistrationBean mid process => No database persistence along this process, store in session
 	- ## Inputs of the evil user
 		- code injection => charset limitation and syntax checking
-		- too long inputs => limit input length
+		- TODO too long inputs => limit input length
 		- profane username => **Profanity Check**
 	- ## Actions of the evil user
 		- Repeat verification process infinite times => restrict attempts per time (**Verification Block**)
@@ -32,6 +32,7 @@
 		- In every method the current state is checked in order to prevent illegal access
 		- In almost every method the state is changed
 		- That means, that higher logic only needs to work with the objects responses to certain interactions => The logic that checks if an interaction is allowed is implemented inside the `StatefulRegistrationBean` object.
+	- {{embed [[Process Implementation using Beans]]}}
 	- The states of this object are defined in `RegistrationState`.
 - # API
 	- {{embed [[Registration API]]}}

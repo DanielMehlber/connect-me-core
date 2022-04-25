@@ -6,8 +6,6 @@ import org.connectme.core.userManagement.entities.PassedUserData;
 import org.connectme.core.userManagement.exceptions.*;
 import org.connectme.core.userManagement.entities.User;
 
-import org.connectme.core.userManagement.exceptions.VerificationAttemptNotAllowedException;
-import org.connectme.core.userManagement.exceptions.WrongVerificationCodeException;
 import org.springframework.stereotype.Component;
 import org.springframework.web.context.annotation.SessionScope;
 

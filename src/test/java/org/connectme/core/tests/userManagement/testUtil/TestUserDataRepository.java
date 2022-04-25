@@ -121,7 +121,7 @@ public class TestUserDataRepository {
         }
     }
 
-    public static PassedUserData assembleValidRegistrationUserData() {
+    public static PassedUserData assembleValidPassedUserData() {
         return new PassedUserData(
                 TestUserDataRepository.Usernames.getRandomAllowed(),
                 TestUserDataRepository.Passwords.getRandomAllowed(),

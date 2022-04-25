@@ -73,7 +73,7 @@ public class RegistrationAPITest {
         client.perform(post("/users/registration/init").session(session)).andExpect(status().isOk());
 
         // 2) send user registration data
-        final PassedUserData userData = TestUserDataRepository.assembleValidRegistrationUserData();
+        final PassedUserData userData = TestUserDataRepository.assembleValidPassedUserData();
         String json = new ObjectMapper().writeValueAsString(userData);
 
         client.perform(post("/users/registration/set/userdata")
@@ -134,7 +134,7 @@ public class RegistrationAPITest {
      */
     @Test
     public void attemptIllegalAccess() throws Exception {
-        final PassedUserData userData = TestUserDataRepository.assembleValidRegistrationUserData();
+        final PassedUserData userData = TestUserDataRepository.assembleValidPassedUserData();
         final String json = new ObjectMapper().writeValueAsString(userData);
         MockHttpSession session = new MockHttpSession();
 
@@ -244,7 +244,7 @@ public class RegistrationAPITest {
         client.perform(post("/users/registration/init").session(session)).andExpect(status().isOk());
 
         // 2) send user registration data
-        final PassedUserData userData = TestUserDataRepository.assembleValidRegistrationUserData();
+        final PassedUserData userData = TestUserDataRepository.assembleValidPassedUserData();
         String json = new ObjectMapper().writeValueAsString(userData);
 
         client.perform(post("/users/registration/set/userdata")
@@ -316,7 +316,7 @@ public class RegistrationAPITest {
         /*
          * 1) create user in database with username
          */
-        PassedUserData userData = TestUserDataRepository.assembleValidRegistrationUserData();
+        PassedUserData userData = TestUserDataRepository.assembleValidPassedUserData();
         userManagement.createNewUser(new User(userData));
 
 

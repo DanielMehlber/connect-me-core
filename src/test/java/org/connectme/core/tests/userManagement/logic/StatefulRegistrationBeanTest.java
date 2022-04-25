@@ -1,4 +1,4 @@
-package org.connectme.core.tests.userManagement.processes;
+package org.connectme.core.tests.userManagement.logic;
 
 import org.connectme.core.globalExceptions.ForbiddenInteractionException;
 import org.connectme.core.tests.userManagement.testUtil.TestUserDataRepository;
@@ -22,7 +22,7 @@ public class StatefulRegistrationBeanTest {
          * SCENARIO: go through happy path of registration process
          */
 
-        PassedUserData userData = TestUserDataRepository.assembleValidRegistrationUserData();
+        PassedUserData userData = TestUserDataRepository.assembleValidPassedUserData();
 
         StatefulRegistrationBean statefulRegistrationBean = new StatefulRegistrationBean();
 
@@ -50,7 +50,7 @@ public class StatefulRegistrationBeanTest {
 
         StatefulRegistrationBean statefulRegistrationBean = new StatefulRegistrationBean();
 
-        statefulRegistrationBean.setUserData(TestUserDataRepository.assembleValidRegistrationUserData());
+        statefulRegistrationBean.setUserData(TestUserDataRepository.assembleValidPassedUserData());
 
         // exceed max amount of allowed verifications attempts
         for (int i = 0; i < statefulRegistrationBean.getPhoneNumberVerification().getMaxVerificationAttempts(); i++) {
@@ -84,7 +84,7 @@ public class StatefulRegistrationBeanTest {
 
         StatefulRegistrationBean statefulRegistrationBean = new StatefulRegistrationBean();
 
-        statefulRegistrationBean.setUserData(TestUserDataRepository.assembleValidRegistrationUserData());
+        statefulRegistrationBean.setUserData(TestUserDataRepository.assembleValidPassedUserData());
 
         // exceed max attempt of verifications
         for (int i = 0; i < statefulRegistrationBean.getPhoneNumberVerification().getMaxVerificationAttempts(); i++) {
@@ -109,7 +109,7 @@ public class StatefulRegistrationBeanTest {
          * Test that other interactions are not allowed
          */
 
-        PassedUserData userData = TestUserDataRepository.assembleValidRegistrationUserData();
+        PassedUserData userData = TestUserDataRepository.assembleValidPassedUserData();
 
         // Set state to CREATED, following interactions are not allowed:
         StatefulRegistrationBean statefulRegistrationBean = new StatefulRegistrationBean();

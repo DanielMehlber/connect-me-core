@@ -7,24 +7,12 @@
  {:block/name "account update process",
   :block/created-at 1649025096571,
   :block/updated-at 1649025096571}
- {:block/name "apr 12th, 2022",
-  :block/created-at 1649754091029,
-  :block/updated-at 1649754091029}
- {:block/name "apr 13th, 2022",
-  :block/created-at 1649800800348,
-  :block/updated-at 1649800800348}
- {:block/name "apr 14th, 2022",
-  :block/created-at 1649887339623,
-  :block/updated-at 1649887339623}
- {:block/name "apr 16th, 2022",
-  :block/created-at 1650137838160,
-  :block/updated-at 1650137838160}
- {:block/name "apr 17th, 2022",
-  :block/created-at 1650151866553,
-  :block/updated-at 1650151866553}
- {:block/name "apr 18th, 2022",
-  :block/created-at 1650293398305,
-  :block/updated-at 1650293398305}
+ {:block/name "apr 24th, 2022",
+  :block/created-at 1650810514837,
+  :block/updated-at 1650810514837}
+ {:block/name "apr 25th, 2022",
+  :block/created-at 1650837603388,
+  :block/updated-at 1650837603388}
  {:block/name "apr 4th, 2022",
   :block/created-at 1649024885137,
   :block/updated-at 1649026623720}
@@ -52,15 +40,9 @@
  {:block/name "done",
   :block/created-at 1649058944387,
   :block/updated-at 1649058944387}
- {:block/name "draws/2022-04-17-01-58-12.excalidraw",
-  :block/created-at 1650294671022,
-  :block/updated-at 1650294671022}
- {:block/name "draws/2022-04-17-01-58-13.excalidraw",
-  :block/created-at 1650294671022,
-  :block/updated-at 1650294671022}
  {:block/name "draws/2022-04-17-01-58-20.excalidraw",
-  :block/created-at 1650294671022,
-  :block/updated-at 1650294671022}
+  :block/created-at 1650810825799,
+  :block/updated-at 1650810825799}
  {:block/name "favorites",
   :block/created-at 1649058944387,
   :block/updated-at 1649058944387}
@@ -69,7 +51,7 @@
   :block/updated-at 1649796389822}
  {:block/name "how-to-test",
   :block/created-at 1649796189075,
-  :block/updated-at 1649896411293}
+  :block/updated-at 1650321910813}
  {:block/name "in-progress",
   :block/created-at 1649058944387,
   :block/updated-at 1649058944387}
@@ -78,13 +60,16 @@
   :block/updated-at 1649058944387}
  {:block/name "login process",
   :block/created-at 1649025039056,
-  :block/updated-at 1649025039056}
+  :block/updated-at 1650810819211}
  {:block/name "now",
   :block/created-at 1649058944387,
   :block/updated-at 1649058944387}
  {:block/name "onboarding",
   :block/created-at 1649366512110,
   :block/updated-at 1649368953946}
+ {:block/name "process implementation using beans",
+  :block/created-at 1650810617916,
+  :block/updated-at 1650810617916}
  {:block/name "project structure",
   :block/created-at 1649361071512,
   :block/updated-at 1649755150300}
@@ -93,13 +78,13 @@
   :block/updated-at 1649754849085}
  {:block/name "registration process",
   :block/created-at 1649024961508,
-  :block/updated-at 1649754319288}
+  :block/updated-at 1650810757969}
  {:block/name "todo",
   :block/created-at 1649058944387,
   :block/updated-at 1649058944387}
  {:block/name "user management component",
   :block/created-at 1649024932567,
-  :block/updated-at 1650154881114}
+  :block/updated-at 1650810617918}
  {:block/name "wait",
   :block/created-at 1649058944387,
   :block/updated-at 1649058944387}

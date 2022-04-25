@@ -32,7 +32,7 @@ public class UserManagementTest {
 
     @Test
     public void testCreateUser() throws InternalErrorException, UsernameAlreadyTakenException, NoSuchUserException {
-        PassedUserData userdata = TestUserDataRepository.assembleValidRegistrationUserData();
+        PassedUserData userdata = TestUserDataRepository.assembleValidPassedUserData();
         User user = new User(userdata);
 
         // persist new user
@@ -46,7 +46,7 @@ public class UserManagementTest {
 
     @Test
     public void testUpdateUser() throws InternalErrorException, UsernameAlreadyTakenException, NoSuchUserException {
-        PassedUserData originalUserData = TestUserDataRepository.assembleValidRegistrationUserData();
+        PassedUserData originalUserData = TestUserDataRepository.assembleValidPassedUserData();
         User user = new User(originalUserData);
 
         // persist new user
@@ -55,7 +55,7 @@ public class UserManagementTest {
         // create new user data that is different from the original one but with same username
         PassedUserData newUserData;
         do {
-            newUserData = TestUserDataRepository.assembleValidRegistrationUserData();
+            newUserData = TestUserDataRepository.assembleValidPassedUserData();
             newUserData.setUsername(originalUserData.getUsername());
         } while (originalUserData.equals(newUserData)); // repeat if user data matches until it doesn't
 
@@ -70,7 +70,7 @@ public class UserManagementTest {
 
     @Test
     public void testDeleteUser() throws InternalErrorException, UsernameAlreadyTakenException, NoSuchUserException {
-        PassedUserData originalUserData = TestUserDataRepository.assembleValidRegistrationUserData();
+        PassedUserData originalUserData = TestUserDataRepository.assembleValidPassedUserData();
         User user = new User(originalUserData);
 
         // persist new user
@@ -85,7 +85,7 @@ public class UserManagementTest {
 
     @Test
     public void testIsUsernameAvailable() throws InternalErrorException, UsernameAlreadyTakenException {
-        PassedUserData originalUserData = TestUserDataRepository.assembleValidRegistrationUserData();
+        PassedUserData originalUserData = TestUserDataRepository.assembleValidPassedUserData();
         User user = new User(originalUserData);
 
         // make sure that the username is available at first
@@ -110,7 +110,7 @@ public class UserManagementTest {
 
     @Test
     public void attemptCreateUserWithTakenUsername() throws InternalErrorException, UsernameAlreadyTakenException {
-        PassedUserData userData = TestUserDataRepository.assembleValidRegistrationUserData();
+        PassedUserData userData = TestUserDataRepository.assembleValidPassedUserData();
         User user = new User(userData);
 
         // create user with username once
@@ -122,7 +122,7 @@ public class UserManagementTest {
 
     @Test
     public void attemptUpdateUnknownUser() throws InternalErrorException {
-        PassedUserData userData = TestUserDataRepository.assembleValidRegistrationUserData();
+        PassedUserData userData = TestUserDataRepository.assembleValidPassedUserData();
         User user = new User(userData);
 
         // user does not exist, expecting exception

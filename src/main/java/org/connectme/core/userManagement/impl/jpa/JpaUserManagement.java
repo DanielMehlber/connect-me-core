@@ -30,7 +30,7 @@ public class JpaUserManagement implements UserManagement {
     @Override
     public User fetchUserByUsername(String username) throws RuntimeException, InternalErrorException, NoSuchUserException {
         try {
-            return userRepository.findById(username).orElseThrow(() -> new NoSuchUserException());
+            return userRepository.findById(username).orElseThrow(NoSuchUserException::new);
         } catch (RuntimeException e) {
             throw new InternalErrorException("cannot fetch user by id", e);
         }
