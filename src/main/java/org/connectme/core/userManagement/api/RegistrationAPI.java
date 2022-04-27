@@ -5,7 +5,7 @@ import org.apache.logging.log4j.Logger;
 import org.connectme.core.globalExceptions.ForbiddenInteractionException;
 import org.connectme.core.globalExceptions.InternalErrorException;
 import org.connectme.core.userManagement.UserManagement;
-import org.connectme.core.userManagement.entities.RegistrationUserData;
+import org.connectme.core.userManagement.entities.PassedUserData;
 import org.connectme.core.userManagement.entities.User;
 import org.connectme.core.userManagement.exceptions.VerificationAttemptNotAllowedException;
 import org.connectme.core.userManagement.exceptions.UserDataInsufficientException;

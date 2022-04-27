@@ -39,7 +39,7 @@ public class JpaUserManagement implements UserManagement {
     public User fetchUserByUsername(String username) throws RuntimeException, InternalErrorException, NoSuchUserException {
         log.debug("fetching user by username...");
         try {
-            return userRepository.findById(username).orElseThrow(() -> new NoSuchUserException());
+            return userRepository.findById(username).orElseThrow(NoSuchUserException::new);
         } catch (RuntimeException e) {
             log.error("cannot fetch user by username: an unexpected runtime error occurred: " + e.getMessage());
             throw new InternalErrorException("cannot fetch user by id", e);

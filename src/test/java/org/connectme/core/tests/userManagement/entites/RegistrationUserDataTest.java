@@ -1,7 +1,7 @@
 package org.connectme.core.tests.userManagement.entites;
 
 import org.connectme.core.tests.userManagement.testUtil.TestUserDataRepository;
-import org.connectme.core.userManagement.entities.RegistrationUserData;
+import org.connectme.core.userManagement.entities.PassedUserData;
 import org.connectme.core.userManagement.exceptions.PasswordTooWeakException;
 import org.connectme.core.userManagement.exceptions.UsernameNotAllowedException;
 import org.junit.jupiter.api.Assertions;
@@ -17,11 +17,11 @@ public class RegistrationUserDataTest {
     public void testCheckUsernamesSyntax() throws UsernameNotAllowedException {
 
         for(String allowed : TestUserDataRepository.Usernames.allowed) {
-            RegistrationUserData.checkUsernameValue(allowed);
+            PassedUserData.checkUsernameValue(allowed);
         }
 
         for(String forbidden : TestUserDataRepository.Usernames.forbidden) {
-            Assertions.assertThrows(UsernameNotAllowedException.class, () -> RegistrationUserData.checkUsernameValue(forbidden));
+            Assertions.assertThrows(UsernameNotAllowedException.class, () -> PassedUserData.checkUsernameValue(forbidden));
         }
 
     }
@@ -35,26 +35,26 @@ public class RegistrationUserDataTest {
 
         // create string that is too short
         StringBuilder tooShortStringBuilder = new StringBuilder();
-        for(int i = 0; i < RegistrationUserData.MIN_USERNAME_LENGTH - 1; i++)
+        for(int i = 0; i < PassedUserData.MIN_USERNAME_LENGTH - 1; i++)
             tooShortStringBuilder.append("a");
         String tooShortString = tooShortStringBuilder.toString();
 
         // create string that is too long
         StringBuilder tooLongStringBuilder = new StringBuilder();
-        for(int i = 0; i <= RegistrationUserData.MAX_USERNAME_LENGTH; i++)
+        for(int i = 0; i <= PassedUserData.MAX_USERNAME_LENGTH; i++)
             tooLongStringBuilder.append("a");
         String tooLongString = tooLongStringBuilder.toString();
 
         // create string that has the right length
-        int length = (RegistrationUserData.MIN_USERNAME_LENGTH + RegistrationUserData.MAX_USERNAME_LENGTH) / 2;
+        int length = (PassedUserData.MIN_USERNAME_LENGTH + PassedUserData.MAX_USERNAME_LENGTH) / 2;
         StringBuilder correctStringBuilder = new StringBuilder();
         for(int i = 0; i < length; i++)
             correctStringBuilder.append("a");
         String correctString = correctStringBuilder.toString();
 
-        Assertions.assertThrows(UsernameNotAllowedException.class, () -> RegistrationUserData.checkUsernameValue(tooShortString));
-        Assertions.assertThrows(UsernameNotAllowedException.class, () -> RegistrationUserData.checkUsernameValue(tooLongString));
-        RegistrationUserData.checkUsernameValue(correctString);
+        Assertions.assertThrows(UsernameNotAllowedException.class, () -> PassedUserData.checkUsernameValue(tooShortString));
+        Assertions.assertThrows(UsernameNotAllowedException.class, () -> PassedUserData.checkUsernameValue(tooLongString));
+        PassedUserData.checkUsernameValue(correctString);
 
     }
 
@@ -67,12 +67,12 @@ public class RegistrationUserDataTest {
 
         String username = "username";
         for(String allowed : TestUserDataRepository.Passwords.allowed) {
-            RegistrationUserData.checkPasswordValue(allowed, username);
+            PassedUserData.checkPasswordValue(allowed, username);
         }
 
         for(String forbidden : TestUserDataRepository.Passwords.forbidden) {
             Assertions.assertThrows(PasswordTooWeakException.class,
-                    () -> RegistrationUserData.checkPasswordValue(forbidden, username));
+                    () -> PassedUserData.checkPasswordValue(forbidden, username));
         }
 
     }
@@ -85,7 +85,7 @@ public class RegistrationUserDataTest {
         String username = TestUserDataRepository.Passwords.getRandomAllowed();
         String password = "abc" + username + "xyz";
         Assertions.assertThrows(PasswordTooWeakException.class,
-                () -> RegistrationUserData.checkPasswordValue(password, username));
+                () -> PassedUserData.checkPasswordValue(password, username));
     }
 
 }

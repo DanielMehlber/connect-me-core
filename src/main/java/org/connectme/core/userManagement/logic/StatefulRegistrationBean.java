@@ -2,14 +2,12 @@ package org.connectme.core.userManagement.logic;
 
 import org.connectme.core.globalExceptions.ForbiddenInteractionException;
 import org.connectme.core.userManagement.api.RegistrationAPI;
-import org.connectme.core.userManagement.entities.RegistrationUserData;
+import org.connectme.core.userManagement.entities.PassedUserData;
 import org.connectme.core.userManagement.exceptions.*;
 import org.connectme.core.userManagement.entities.User;
+
 import org.springframework.stereotype.Component;
 import org.springframework.web.context.annotation.SessionScope;
-
-import java.time.LocalDateTime;
-import java.util.Random;
 
 /**
  * Because of various verification steps along the registration process this application keeps the
@@ -26,22 +24,12 @@ import java.util.Random;
 @SessionScope
 public class StatefulRegistrationBean {
 
-    public static final int MAX_AMOUNT_VERIFICATION_ATTEMPTS = 3;
-    public static final int BLOCK_FAILED_ATTEMPT_MINUTES = 5;
+    private PassedUserData passedUserData;
 
-    private RegistrationUserData passedUserData;
-
-    /** generated verification code for phone number verification */
-    private String verificationCode;
-
-    /** amount of verification attempts. Used to limit amount of attempts per time */
-    private int verificationAttempts;
-
-    /** last verification attempt. Used to allow only a certain amount of attempts per time */
-    private LocalDateTime lastVerificationAttempt;
-
-    /** is registration verified */
-    private boolean verified;
+    /**
+     * Holds all data and progress associated with the two-factor phone number verification.
+     */
+    private SmsPhoneNumberVerification phoneNumberVerification;
 
     /**
      * The registration process has multiple steps along which the client updates the instances state
@@ -69,9 +57,9 @@ public class StatefulRegistrationBean {
      * @throws ForbiddenInteractionException this instance is currently in a different state and awaits different interactions
      * @throws UserDataInsufficientException the user data was checked and declared insufficient or invalid
      * @author Daniel Mehlber
-     * @see RegistrationUserData#check()
+     * @see PassedUserData#check()
      */
-    public void setUserData(final RegistrationUserData passedUserData) throws ForbiddenInteractionException, UserDataInsufficientException {
+    public void setUserData(final PassedUserData passedUserData) throws ForbiddenInteractionException, UserDataInsufficientException {
         if(state != RegistrationState.CREATED)
             throw new ForbiddenInteractionException(
                     String.format("registration is in state %s and cannot accept user data", state.name()));
@@ -102,7 +90,6 @@ public class StatefulRegistrationBean {
      * @throws ForbiddenInteractionException this instance is currently in a different state and awaits different interactions
      * @throws VerificationAttemptNotAllowedException another registration is currently not allowed
      * @author Daniel Mehlber
-     * @see StatefulRegistrationBean#isVerificationAttemptCurrentlyAllowed()
      */
     public void startAndWaitForVerification() throws ForbiddenInteractionException, VerificationAttemptNotAllowedException {
         if (state != RegistrationState.USER_DATA_PASSED)
@@ -110,43 +97,12 @@ public class StatefulRegistrationBean {
                     String.format("registration is in state %s and cannot wait for phone number verification", state.name()));
         else {
 
-            // check if time window has passed and a new attempt is allowed
-            if(isVerificationAttemptCurrentlyAllowed()) {
-                // CASE: verification attempt is allowed
-                this.verificationCode = generateVerificationCode();
-                state = RegistrationState.WAITING_FOR_PHONE_NUMBER_VERIFICATION;
-
-            } else {
-                // CASE: not enough time has passed, prohibit another verification attempt
-                throw new VerificationAttemptNotAllowedException();
-            }
+            phoneNumberVerification.startVerificationAttempt();
+            state = RegistrationState.WAITING_FOR_PHONE_NUMBER_VERIFICATION;
 
         }
     }
 
-    /**
-     * Checks if another verification attempt is allowed at the present moment.
-     * If there are too many failed attempts the user has to wait a certain time.
-     *
-     * @return if another verification attempt is allowed right now
-     * @author Daniel Mehlber
-     */
-    private boolean isVerificationAttemptCurrentlyAllowed() {
-        final LocalDateTime now = LocalDateTime.now();
-        if(verificationAttempts >= MAX_AMOUNT_VERIFICATION_ATTEMPTS) {
-            // CASE: max limit for verification attempts was exceeded
-            if(lastVerificationAttempt.plusMinutes(BLOCK_FAILED_ATTEMPT_MINUTES).isBefore(now)) {
-                // CASE: enough time has passed, allow more attempts
-                verificationAttempts = 0;
-                return true;
-            } else {
-                // CASE: not enough time has passed, prohibit another verification attempt
-                return false;
-            }
-        } else {
-            return true;
-        }
-    }
 
     /**
      * Checks if a process restart (=reset of the registration object) is allowed at the present moment.
@@ -162,16 +118,12 @@ public class StatefulRegistrationBean {
          *
          * If a verification attempt is currently not allowed the user must wait and a reset is not allowed.
          */
-        return isVerificationAttemptCurrentlyAllowed();
+        if(phoneNumberVerification != null)
+            return phoneNumberVerification.isVerificationAttemptCurrentlyAllowed();
+        else
+            return true;
     }
 
-    /**
-     * Generates random verification code
-     * @return verification code
-     */
-    private String generateVerificationCode() {
-        return String.valueOf(new Random().nextInt(99999));
-    }
 
     /**
      * This checks the verification code passed by the user and sets the state accordingly.
@@ -191,20 +143,17 @@ public class StatefulRegistrationBean {
             throw new ForbiddenInteractionException(
                     String.format("registration is in state %s and cannot accept verification codes", state.name()));
         else {
-
-            verificationAttempts++;
-            lastVerificationAttempt = LocalDateTime.now();
-
-            // check if passed verification code is correct
-            if(verificationCode.equals(passedVerificationCode)) {
-                // CASE: correct verification code has been entered
-                verified = true;
-                state = RegistrationState.USER_VERIFIED;
-            } else {
+            // check verification code
+            try {
+                phoneNumberVerification.checkVerificationCode(passedVerificationCode);
+            } catch (final WrongVerificationCodeException e) {
                 // CASE: wrong verification code, user must reenter verification process
                 state = RegistrationState.USER_DATA_PASSED;
-                throw new WrongVerificationCodeException();
+                throw e;
             }
+
+            // CASE: correct verification code has been entered
+            state = RegistrationState.USER_VERIFIED;
         }
 
     }
@@ -222,39 +171,24 @@ public class StatefulRegistrationBean {
      */
     public void reset() throws ForbiddenInteractionException {
         if(isResetAllowed()) {
-            verificationAttempts = 0;
-            lastVerificationAttempt = null;
+            phoneNumberVerification = new SmsPhoneNumberVerification();
             state = RegistrationState.CREATED;
-            verified = false;
             passedUserData = null;
-            verificationCode = null;
         } else {
             throw new ForbiddenInteractionException("a reset is currently not allowed/blocked");
         }
     }
 
-    public RegistrationUserData getPassedUserData() {
+    public PassedUserData getPassedUserData() {
         return passedUserData;
-    }
-
-    public String getVerificationCode() {
-        return verificationCode;
-    }
-
-    public boolean isVerified() {
-        return verified;
     }
 
     public RegistrationState getState() {
         return state;
     }
 
-    /**
-     * Only for testing purposes
-     * @param time new time
-     */
-    public void setLastVerificationAttempt(final LocalDateTime time) {
-        lastVerificationAttempt = time;
+    public SmsPhoneNumberVerification getPhoneNumberVerification() {
+        return phoneNumberVerification;
     }
 
 }

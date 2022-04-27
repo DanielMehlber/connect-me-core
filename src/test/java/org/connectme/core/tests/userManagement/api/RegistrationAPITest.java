@@ -4,7 +4,7 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import org.connectme.core.tests.userManagement.testUtil.TestUserDataRepository;
 import org.connectme.core.userManagement.UserManagement;
 import org.connectme.core.userManagement.api.RegistrationAPI;
-import org.connectme.core.userManagement.entities.RegistrationUserData;
+import org.connectme.core.userManagement.entities.PassedUserData;
 import org.connectme.core.userManagement.entities.User;
 import org.connectme.core.userManagement.impl.jpa.UserRepository;
 import org.connectme.core.userManagement.logic.StatefulRegistrationBean;
@@ -73,7 +73,7 @@ public class RegistrationAPITest {
         client.perform(post("/users/registration/init").session(session)).andExpect(status().isOk());
 
         // 2) send user registration data
-        final RegistrationUserData userData = TestUserDataRepository.assembleValidRegistrationUserData();
+        final PassedUserData userData = TestUserDataRepository.assembleValidPassedUserData();
         String json = new ObjectMapper().writeValueAsString(userData);
 
         client.perform(post("/users/registration/set/userdata")
@@ -89,7 +89,7 @@ public class RegistrationAPITest {
 
         // 4) pass verification code
         StatefulRegistrationBean registrationObject = extractRegistrationBeanFromSession(session);
-        String code = registrationObject.getVerificationCode();
+        String code = registrationObject.getPhoneNumberVerification().getVerificationCode();
 
         client.perform(post("/users/registration/verify")
                         .contentType("text/plain")
@@ -108,7 +108,7 @@ public class RegistrationAPITest {
      */
     @Test
     public void attemptForbiddenUserData() throws Exception {
-        final RegistrationUserData invalidUserData = TestUserDataRepository.assembleForbiddenRegistrationUserData();
+        final PassedUserData invalidUserData = TestUserDataRepository.assembleForbiddenRegistrationUserData();
         final String json = new ObjectMapper().writeValueAsString(invalidUserData);
         MockHttpSession session = new MockHttpSession();
 
@@ -134,7 +134,7 @@ public class RegistrationAPITest {
      */
     @Test
     public void attemptIllegalAccess() throws Exception {
-        final RegistrationUserData userData = TestUserDataRepository.assembleValidRegistrationUserData();
+        final PassedUserData userData = TestUserDataRepository.assembleValidPassedUserData();
         final String json = new ObjectMapper().writeValueAsString(userData);
         MockHttpSession session = new MockHttpSession();
 
@@ -211,7 +211,7 @@ public class RegistrationAPITest {
          */
         // action
         StatefulRegistrationBean registration = extractRegistrationBeanFromSession(session);
-        final String verificationCode = registration.getVerificationCode();
+        final String verificationCode = registration.getPhoneNumberVerification().getVerificationCode();
         client.perform(post("/users/registration/verify")
                         .content(verificationCode)
                         .contentType("text/plain")
@@ -244,7 +244,7 @@ public class RegistrationAPITest {
         client.perform(post("/users/registration/init").session(session)).andExpect(status().isOk());
 
         // 2) send user registration data
-        final RegistrationUserData userData = TestUserDataRepository.assembleValidRegistrationUserData();
+        final PassedUserData userData = TestUserDataRepository.assembleValidPassedUserData();
         String json = new ObjectMapper().writeValueAsString(userData);
 
         client.perform(post("/users/registration/set/userdata")
@@ -253,8 +253,10 @@ public class RegistrationAPITest {
                         .session(session))
                 .andExpect(status().isOk());
 
+        StatefulRegistrationBean statefulRegistrationBean = extractRegistrationBeanFromSession(session);
+
         // 3) exceed the maximum amount of verification attempts
-        for(int i = 0; i < StatefulRegistrationBean.MAX_AMOUNT_VERIFICATION_ATTEMPTS; i++) {
+        for(int i = 0; i < statefulRegistrationBean.getPhoneNumberVerification().getMaxVerificationAttempts(); i++) {
             // 3.1) start verification process
             client.perform(post("/users/registration/start/verify")
                             .session(session))
@@ -312,7 +314,7 @@ public class RegistrationAPITest {
         /*
          * 1) create user in database with username
          */
-        RegistrationUserData userData = TestUserDataRepository.assembleValidRegistrationUserData();
+        PassedUserData userData = TestUserDataRepository.assembleValidPassedUserData();
         userManagement.createNewUser(new User(userData));
 
 
