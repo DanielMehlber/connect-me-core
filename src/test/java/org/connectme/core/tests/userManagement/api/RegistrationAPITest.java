@@ -108,7 +108,7 @@ public class RegistrationAPITest {
      */
     @Test
     public void attemptForbiddenUserData() throws Exception {
-        final PassedUserData invalidUserData = TestUserDataRepository.assembleForbiddenRegistrationUserData();
+        final PassedUserData invalidUserData = TestUserDataRepository.assembleForbiddenPassedUserData();
         final String json = new ObjectMapper().writeValueAsString(invalidUserData);
         MockHttpSession session = new MockHttpSession();
 

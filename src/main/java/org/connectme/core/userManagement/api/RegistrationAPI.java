@@ -50,7 +50,7 @@ public class RegistrationAPI {
 
 
     @PostMapping(value="/users/registration/set/userdata", consumes="application/json")
-    public void uploadUserData(@RequestBody final RegistrationUserData userData) throws ForbiddenInteractionException, UserDataInsufficientException, InternalErrorException, UsernameAlreadyTakenException {
+    public void uploadUserData(@RequestBody final PassedUserData userData) throws ForbiddenInteractionException, UserDataInsufficientException, InternalErrorException, UsernameAlreadyTakenException {
         log.debug("user data for registration received");
         /*
          * setting user data in session bean (if interaction is even allowed) and checking if it is allowed by the
