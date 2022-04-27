@@ -7,7 +7,7 @@ import org.connectme.core.userManagement.exceptions.UsernameNotAllowedException;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.Test;
 
-public class RegistrationUserDataTest {
+public class PassedUserDataTest {
 
     /**
      * Check username syntax checker

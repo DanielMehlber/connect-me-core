@@ -128,7 +128,7 @@ public class TestUserDataRepository {
                 TestUserDataRepository.PhoneNumbers.getRandomAllowed());
     }
 
-    public static PassedUserData assembleForbiddenRegistrationUserData() {
+    public static PassedUserData assembleForbiddenPassedUserData() {
         return new PassedUserData(
                 TestUserDataRepository.Usernames.getRandomForbidden(),
                 TestUserDataRepository.Passwords.getRandomForbidden(),

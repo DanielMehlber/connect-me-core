@@ -108,7 +108,7 @@ public class RegistrationAPITest {
      */
     @Test
     public void attemptForbiddenUserData() throws Exception {
-        final PassedUserData invalidUserData = TestUserDataRepository.assembleForbiddenRegistrationUserData();
+        final PassedUserData invalidUserData = TestUserDataRepository.assembleForbiddenPassedUserData();
         final String json = new ObjectMapper().writeValueAsString(invalidUserData);
         MockHttpSession session = new MockHttpSession();
 
@@ -284,9 +284,7 @@ public class RegistrationAPITest {
         performUntilVerificationAttemptsExceeded(session);
 
         // try another time (this should fail because the verification is blocked)
-        client.perform(post("/users/registration/verify")
-                        .contentType("text/plain")
-                        .content("wrong")
+        client.perform(post("/users/registration/start/verify")
                         .session(session))
                 .andExpect(status().isForbidden());
 

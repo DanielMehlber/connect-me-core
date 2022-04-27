@@ -1,5 +1,7 @@
 package org.connectme.core.userManagement.api;
 
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
 import org.connectme.core.globalExceptions.ForbiddenInteractionException;
 import org.connectme.core.globalExceptions.InternalErrorException;
 import org.connectme.core.userManagement.UserManagement;
@@ -24,6 +26,8 @@ public class RegistrationAPI {
 
     public static final String SESSION_REGISTRATION = "session-registration";
 
+    private final Logger log = LogManager.getLogger(RegistrationAPI.class);
+
     @Autowired
     private StatefulRegistrationBean registration;
 
@@ -34,32 +38,54 @@ public class RegistrationAPI {
      */
     @PostMapping("/users/registration/init")
     public void initRegistration() throws ForbiddenInteractionException {
-        registration.reset();
-        //           ^^^^^ may throw ForbiddenInteractionException if reset is not allowed
+        log.debug("registration initialization requested");
+        try {
+            registration.reset();
+        } catch (final ForbiddenInteractionException e) {
+            log.warn("registration re-initialization currently not allowed");
+            throw e;
+        }
+        log.info("registration (re-)initialized and reset");
     }
 
 
     @PostMapping(value="/users/registration/set/userdata", consumes="application/json")
     public void uploadUserData(@RequestBody final PassedUserData userData) throws ForbiddenInteractionException, UserDataInsufficientException, InternalErrorException, UsernameAlreadyTakenException {
-
+        log.debug("user data for registration received");
         /*
          * setting user data in session bean (if interaction is even allowed) and checking if it is allowed by the
          * system (syntax, profanity, ...).
          *
          * The availability will be checked in the next step, not here yet.
          */
-        registration.setUserData(userData);
-        //           ^^^^^^^^^^^ may throw ForbiddenInteractionException, UsernameAlreadyTakenException
+        try { // catch internal errors
+            try {
+                registration.setUserData(userData);
+            } catch (ForbiddenInteractionException e) {
+                log.warn("user data upload denied: " + e.getMessage());
+                throw e;
+            } catch (UserDataInsufficientException e) {
+                log.warn("user data rejected: " + e.getMessage());
+                throw e;
+            }
 
-        /*
-         * the availability of the username will be checked here.
-         * It's checked after it is confirmed to be allowed in any other ways on purpose.
-         */
-        if(!userManagement.isUsernameAvailable(userData.getUsername())) {
-            // if user data is invalid, reset to remove user data from registration
-            registration.reset();
-            throw new UsernameAlreadyTakenException();
+
+            /*
+             * the availability of the username will be checked here.
+             * It's checked after it is confirmed to be allowed in any other ways on purpose.
+             */
+            if (!userManagement.isUsernameAvailable(userData.getUsername())) {
+                log.warn("user data upload failed: username is already taken and therefor not available");
+                // if user data is invalid, reset to remove user data from registration
+                registration.reset();
+                throw new UsernameAlreadyTakenException();
+            }
+        } catch (InternalErrorException e) {
+            log.fatal("user data upload for registration failed due to an internal error", e);
+            throw e;
         }
+
+        log.info("user data for registration received");
     }
 
     /**
@@ -70,9 +96,21 @@ public class RegistrationAPI {
      */
     @PostMapping("/users/registration/start/verify")
     public void startVerificationProcess() throws ForbiddenInteractionException, VerificationAttemptNotAllowedException {
-        // start verification process
-        registration.startAndWaitForVerification();
-        //           ^^^^^^^^^^^^^^^^^^^^^^^^^^^ may throw ForbiddenInteractionException, VerificationAttemptNotAllowedException
+        log.debug("start of phone number verification process requested");
+        try {
+            // start verification process
+            registration.startAndWaitForVerification();
+        } catch (ForbiddenInteractionException e) {
+            log.warn("start of phone number verification process denied: " + e.getMessage());
+            throw e;
+        } catch (VerificationAttemptNotAllowedException e) {
+            log.warn("start of another verification attempt denied: " + e.getMessage());
+            throw e;
+        }
+
+
+        // TODO: send verification code via SMS (but only if not in testing mode)
+        log.info("phone number verification process started for registration");
     }
 
     /**
@@ -84,16 +122,35 @@ public class RegistrationAPI {
      */
     @PostMapping(value="/users/registration/verify", consumes="text/plain")
     public void verifyWithCode(@RequestBody final String passedVerificationCode) throws ForbiddenInteractionException, WrongVerificationCodeException, InternalErrorException, UsernameAlreadyTakenException {
+        log.debug("phone number verification code received");
         // verify using code
-        registration.checkVerificationCode(passedVerificationCode);
-        //           ^^^^^^^^^^^^^^^^^^^^^ may throw WrongVerificationCodeException
+        try {
+            registration.checkVerificationCode(passedVerificationCode);
+        } catch (ForbiddenInteractionException e) {
+            log.warn("phone number verification not allowed: " + e.getMessage());
+            throw e;
+        } catch (WrongVerificationCodeException e) {
+            log.warn("verification unsuccessful: passed verification code is not correct");
+            throw e;
+        }
 
-        /*
-         * create user from registration data and persist him in DB
-         */
-        final User newUser = new User(registration.getPassedUserData());
-        userManagement.createNewUser(newUser);
-        //             ^^^^^^^^^^^^^ may throw UsernameAlreadyTakenException
+        log.info("phone number verification successful");
+        try {
+            /*
+             * create user from registration data and persist him in DB
+             */
+            final User newUser = new User(registration.getPassedUserData());
+            userManagement.createNewUser(newUser);
+            //             ^^^^^^^^^^^^^ may throw UsernameAlreadyTakenException
+        } catch (InternalErrorException e) {
+            log.warn("cannot create new user due to an internal error: " + e.getMessage());
+            throw e;
+        } catch (UsernameAlreadyTakenException e) {
+            log.warn("cannot create new user: username is already taken");
+            throw e;
+        }
+
+        log.info("created new user in database successfully");
     }
 
 }
