@@ -282,9 +282,7 @@ public class RegistrationAPITest {
         performUntilVerificationAttemptsExceeded(session);
 
         // try another time (this should fail because the verification is blocked)
-        client.perform(post("/users/registration/verify")
-                        .contentType("text/plain")
-                        .content("wrong")
+        client.perform(post("/users/registration/start/verify")
                         .session(session))
                 .andExpect(status().isForbidden());
 
