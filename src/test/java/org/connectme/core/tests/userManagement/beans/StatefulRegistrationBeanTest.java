@@ -1,12 +1,12 @@
-package org.connectme.core.tests.userManagement.logic;
+package org.connectme.core.tests.userManagement.beans;
 
 import org.connectme.core.globalExceptions.ForbiddenInteractionException;
 import org.connectme.core.tests.userManagement.testUtil.TestUserDataRepository;
+import org.connectme.core.userManagement.beans.StatefulRegistrationBean;
 import org.connectme.core.userManagement.entities.PassedUserData;
-import org.connectme.core.userManagement.exceptions.VerificationAttemptNotAllowedException;
 import org.connectme.core.userManagement.exceptions.UserDataInsufficientException;
+import org.connectme.core.userManagement.exceptions.VerificationAttemptNotAllowedException;
 import org.connectme.core.userManagement.exceptions.WrongVerificationCodeException;
-import org.connectme.core.userManagement.logic.StatefulRegistrationBean;
 import org.connectme.core.userManagement.logic.RegistrationState;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.Test;

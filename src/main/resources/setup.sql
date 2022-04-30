@@ -1,4 +1,3 @@
-USE CoreDB;
 CREATE TABLE user (
     username VARCHAR(20) PRIMARY KEY,
     password_hash VARCHAR(64) NOT NULL, -- SHA256 Hash

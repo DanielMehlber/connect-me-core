@@ -18,5 +18,5 @@
 		- Repeat verification process infinite times => restrict attempts per time (**Verification Block**)
 			- e.g. limit of 3 attempts. User will be blocked for 5mins after those
 		- Bypass verification block by restarting (=resetting) statefulRegistrationBean process => keep statefulRegistrationBean object in session and check if process restart/reset is allowed
-		-
-		-
+- # Authentication
+	- {{embed [[Authentication]]}}

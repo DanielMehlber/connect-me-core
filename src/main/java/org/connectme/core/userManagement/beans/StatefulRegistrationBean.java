@@ -1,11 +1,12 @@
-package org.connectme.core.userManagement.logic;
+package org.connectme.core.userManagement.beans;
 
 import org.connectme.core.globalExceptions.ForbiddenInteractionException;
 import org.connectme.core.userManagement.api.RegistrationAPI;
 import org.connectme.core.userManagement.entities.PassedUserData;
-import org.connectme.core.userManagement.exceptions.*;
 import org.connectme.core.userManagement.entities.User;
-
+import org.connectme.core.userManagement.exceptions.*;
+import org.connectme.core.userManagement.logic.RegistrationState;
+import org.connectme.core.userManagement.logic.SmsPhoneNumberVerification;
 import org.springframework.stereotype.Component;
 import org.springframework.web.context.annotation.SessionScope;
 

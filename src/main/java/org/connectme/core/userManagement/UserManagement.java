@@ -3,6 +3,7 @@ package org.connectme.core.userManagement;
 import org.connectme.core.globalExceptions.InternalErrorException;
 import org.connectme.core.userManagement.entities.User;
 import org.connectme.core.userManagement.exceptions.NoSuchUserException;
+import org.connectme.core.userManagement.exceptions.UserDataInsufficientException;
 import org.connectme.core.userManagement.exceptions.UsernameAlreadyTakenException;
 
 /**
@@ -38,8 +39,9 @@ public interface UserManagement {
      * @throws RuntimeException any other unexpected errors that must be handled
      * @throws InternalErrorException possible internal errors e.g. because of database connection
      * @throws UsernameAlreadyTakenException user with this username cannot be created, username is not available
+     * @throws UserDataInsufficientException passed user data was rejected by database constraints and value checks
      */
-    void createNewUser(final User userdata) throws RuntimeException, InternalErrorException, UsernameAlreadyTakenException;
+    void createNewUser(final User userdata) throws RuntimeException, InternalErrorException, UsernameAlreadyTakenException, UserDataInsufficientException;
 
     /**
      * Update user data
@@ -47,8 +49,9 @@ public interface UserManagement {
      * @throws RuntimeException any other unexpected errors that must be handled
      * @throws InternalErrorException possible internal errors e.g. because of database connection
      * @throws NoSuchUserException no such user with passed username
+     * @throws UserDataInsufficientException passed user data was rejected by database constraints and value checks
      */
-    void updateUserData(final User userdata) throws RuntimeException, InternalErrorException, NoSuchUserException;
+    void updateUserData(final User userdata) throws RuntimeException, InternalErrorException, NoSuchUserException, UserDataInsufficientException;
 
     /**
      * Delete user and all its data
