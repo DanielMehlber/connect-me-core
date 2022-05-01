@@ -111,7 +111,7 @@ public class LoginAPI {
     }
 
     @PostMapping(value = "/users/login/verify/check", consumes = "text/plain", produces = "text/plain")
-    public String receiveVerificationCode(@RequestBody final String passedVerificationCode) throws ForbiddenInteractionException, WrongVerificationCodeException, InternalErrorException, NoSuchUserException {
+    public String receiveVerificationCode(@RequestBody final String passedVerificationCode) throws ForbiddenInteractionException, WrongVerificationCodeException, InternalErrorException {
         log.debug("received phone number verification code for login...");
 
         // check verification code
@@ -134,7 +134,7 @@ public class LoginAPI {
             jwtToken = authenticationUserBean.login(user);
         } catch (InternalErrorException | NoSuchUserException e) {
             log.fatal("cannot login verified user due to an fatal internal error: " + e.getMessage());
-            throw e;
+            throw new InternalErrorException("cannot login verified user", e);
         }
 
         log.debug("user has been logged-in successfully");

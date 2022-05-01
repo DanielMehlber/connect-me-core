@@ -50,6 +50,7 @@ public class SmsPhoneNumberVerification {
      * @return true if a verification attempt is allowed at the present moment.
      */
     public boolean isVerificationAttemptCurrentlyAllowed() {
+        // TODO: check if there is a pending verification attempt. It must expire before a new one can be opened
         final LocalDateTime now = LocalDateTime.now();
         if(verificationAttempts >= MAX_AMOUNT_VERIFICATION_ATTEMPTS) {
             // CASE: max limit for verification attempts was exceeded

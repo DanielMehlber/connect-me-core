@@ -50,4 +50,6 @@ public class SmsPhoneNumberVerificationTest {
 
     }
 
+    // TODO: test isVerificationAttemptAllowed: should not be allowed if a verification attempt is pending
+
 }

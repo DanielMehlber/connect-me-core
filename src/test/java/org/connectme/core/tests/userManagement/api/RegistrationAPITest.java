@@ -332,4 +332,6 @@ public class RegistrationAPITest {
                         .session(session))
                 .andExpect(status().isConflict());
     }
+
+    // TODO: assert that a user cannot enter a phone number that is already in use by another user
 }

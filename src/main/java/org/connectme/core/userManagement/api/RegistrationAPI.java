@@ -8,10 +8,7 @@ import org.connectme.core.userManagement.UserManagement;
 import org.connectme.core.userManagement.beans.StatefulRegistrationBean;
 import org.connectme.core.userManagement.entities.PassedUserData;
 import org.connectme.core.userManagement.entities.User;
-import org.connectme.core.userManagement.exceptions.UserDataInsufficientException;
-import org.connectme.core.userManagement.exceptions.UsernameAlreadyTakenException;
-import org.connectme.core.userManagement.exceptions.VerificationAttemptNotAllowedException;
-import org.connectme.core.userManagement.exceptions.WrongVerificationCodeException;
+import org.connectme.core.userManagement.exceptions.*;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
@@ -63,7 +60,7 @@ public class RegistrationAPI {
      * @author Daniel Mehlber
      */
     @PostMapping(value="/users/registration/set/userdata", consumes="application/json")
-    public void uploadUserData(@RequestBody final PassedUserData userData) throws ForbiddenInteractionException, UserDataInsufficientException, InternalErrorException, UsernameAlreadyTakenException {
+    public void uploadUserData(@RequestBody final PassedUserData userData) throws ForbiddenInteractionException, UserDataInsufficientException, InternalErrorException, UsernameAlreadyTakenException, PhoneNumberAlreadyInUseException {
         log.debug("user data for registration received");
         /*
          * setting user data in session bean (if interaction is even allowed) and checking if it is allowed by the
@@ -79,6 +76,9 @@ public class RegistrationAPI {
                 throw e;
             } catch (UserDataInsufficientException e) {
                 log.warn("user data rejected: " + e.getMessage());
+                throw e;
+            } catch (PhoneNumberAlreadyInUseException e) {
+                log.warn("user data rejected: the passed phone number is already in use");
                 throw e;
             }
 

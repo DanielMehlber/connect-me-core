@@ -4,27 +4,44 @@ import org.connectme.core.globalExceptions.ForbiddenInteractionException;
 import org.connectme.core.tests.userManagement.testUtil.TestUserDataRepository;
 import org.connectme.core.userManagement.beans.StatefulRegistrationBean;
 import org.connectme.core.userManagement.entities.PassedUserData;
+import org.connectme.core.userManagement.exceptions.PhoneNumberAlreadyInUseException;
 import org.connectme.core.userManagement.exceptions.UserDataInsufficientException;
 import org.connectme.core.userManagement.exceptions.VerificationAttemptNotAllowedException;
 import org.connectme.core.userManagement.exceptions.WrongVerificationCodeException;
+import org.connectme.core.userManagement.impl.jpa.UserRepository;
 import org.connectme.core.userManagement.logic.RegistrationState;
 import org.junit.jupiter.api.Assertions;
+import org.junit.jupiter.api.BeforeAll;
+import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.boot.test.context.SpringBootTest;
 
 import java.time.LocalDateTime;
 
-
+@SpringBootTest
 public class StatefulRegistrationBeanTest {
 
+    @Autowired
+    private StatefulRegistrationBean statefulRegistrationBean;
+
+    @Autowired
+    private UserRepository userRepository;
+
+    @BeforeEach
+    public void prepare() {
+        userRepository.deleteAll();
+    }
+
     @Test
-    public void happyPath() throws VerificationAttemptNotAllowedException, WrongVerificationCodeException, ForbiddenInteractionException, UserDataInsufficientException {
+    public void happyPath() throws VerificationAttemptNotAllowedException, WrongVerificationCodeException, ForbiddenInteractionException, UserDataInsufficientException, PhoneNumberAlreadyInUseException {
         /*
          * SCENARIO: go through happy path of registration process
          */
 
         PassedUserData userData = TestUserDataRepository.assembleValidPassedUserData();
 
-        StatefulRegistrationBean statefulRegistrationBean = new StatefulRegistrationBean();
+        statefulRegistrationBean.reset();
 
         statefulRegistrationBean.setUserData(userData);
         Assertions.assertEquals(statefulRegistrationBean.getPassedUserData(), userData);
@@ -40,7 +57,7 @@ public class StatefulRegistrationBeanTest {
     }
 
     @Test
-    public void exceedVerificationLimit() throws VerificationAttemptNotAllowedException, WrongVerificationCodeException, ForbiddenInteractionException, UserDataInsufficientException {
+    public void exceedVerificationLimit() throws VerificationAttemptNotAllowedException, WrongVerificationCodeException, ForbiddenInteractionException, UserDataInsufficientException, PhoneNumberAlreadyInUseException {
         /*
          * SCENARIO: evil or clumsy user enters wrong verification code too often and has to wait for a certain amount
          * of time. The amount of verification attempts per time has to be limited because SMS costs money.
@@ -48,7 +65,7 @@ public class StatefulRegistrationBeanTest {
          * Test this security mechanism
          */
 
-        StatefulRegistrationBean statefulRegistrationBean = new StatefulRegistrationBean();
+        statefulRegistrationBean.reset();
 
         statefulRegistrationBean.setUserData(TestUserDataRepository.assembleValidPassedUserData());
 
@@ -73,7 +90,7 @@ public class StatefulRegistrationBeanTest {
     }
 
     @Test
-    public void attemptProcessRestartWhileVerificationBlock() throws VerificationAttemptNotAllowedException, ForbiddenInteractionException, UserDataInsufficientException {
+    public void attemptProcessRestartWhileVerificationBlock() throws VerificationAttemptNotAllowedException, ForbiddenInteractionException, UserDataInsufficientException, PhoneNumberAlreadyInUseException {
         /*
          * SCENARIO: evil user tries to send infinite verification SMS in order to harm us:
          * After he attempted too many verifications he must wait. To bypass that, he tries to reset the
@@ -82,7 +99,7 @@ public class StatefulRegistrationBeanTest {
          * Test this security mechanism
          */
 
-        StatefulRegistrationBean statefulRegistrationBean = new StatefulRegistrationBean();
+        statefulRegistrationBean.reset();
 
         statefulRegistrationBean.setUserData(TestUserDataRepository.assembleValidPassedUserData());
 
@@ -102,7 +119,7 @@ public class StatefulRegistrationBeanTest {
     }
 
     @Test
-    public void attemptIllegalInteractionsToStates() throws WrongVerificationCodeException, VerificationAttemptNotAllowedException, ForbiddenInteractionException, UserDataInsufficientException {
+    public void attemptIllegalInteractionsToStates() throws WrongVerificationCodeException, VerificationAttemptNotAllowedException, ForbiddenInteractionException, UserDataInsufficientException, PhoneNumberAlreadyInUseException {
         /*
          * SCENARIO: In every state of the registration only certain interactions are allowed.
          *
@@ -112,7 +129,7 @@ public class StatefulRegistrationBeanTest {
         PassedUserData userData = TestUserDataRepository.assembleValidPassedUserData();
 
         // Set state to CREATED, following interactions are not allowed:
-        StatefulRegistrationBean statefulRegistrationBean = new StatefulRegistrationBean();
+        statefulRegistrationBean.reset();
         Assertions.assertThrows(ForbiddenInteractionException.class, statefulRegistrationBean::startAndWaitForVerification);
         Assertions.assertThrows(ForbiddenInteractionException.class, () -> statefulRegistrationBean.checkVerificationCode(""));
 

@@ -5,8 +5,10 @@ import org.connectme.core.userManagement.api.RegistrationAPI;
 import org.connectme.core.userManagement.entities.PassedUserData;
 import org.connectme.core.userManagement.entities.User;
 import org.connectme.core.userManagement.exceptions.*;
+import org.connectme.core.userManagement.impl.jpa.UserRepository;
 import org.connectme.core.userManagement.logic.RegistrationState;
 import org.connectme.core.userManagement.logic.SmsPhoneNumberVerification;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 import org.springframework.web.context.annotation.SessionScope;
 
@@ -24,6 +26,9 @@ import org.springframework.web.context.annotation.SessionScope;
 @Component(RegistrationAPI.SESSION_REGISTRATION)
 @SessionScope
 public class StatefulRegistrationBean {
+
+    @Autowired
+    private UserRepository userRepository;
 
     private PassedUserData passedUserData;
 
@@ -60,7 +65,7 @@ public class StatefulRegistrationBean {
      * @author Daniel Mehlber
      * @see PassedUserData#check()
      */
-    public void setUserData(final PassedUserData passedUserData) throws ForbiddenInteractionException, UserDataInsufficientException {
+    public void setUserData(final PassedUserData passedUserData) throws ForbiddenInteractionException, UserDataInsufficientException, PhoneNumberAlreadyInUseException {
         if(state != RegistrationState.CREATED)
             throw new ForbiddenInteractionException(
                     String.format("registration is in state %s and cannot accept user data", state.name()));
@@ -68,6 +73,11 @@ public class StatefulRegistrationBean {
             // perform value check
             try {
                 passedUserData.check();
+
+                // check if phone number is already in use by another user
+                if(userRepository.existsByPhoneNumber(passedUserData.getPhoneNumber())) {
+                    throw new PhoneNumberAlreadyInUseException();
+                }
             } catch (final PasswordTooWeakException | UsernameNotAllowedException | PhoneNumberInvalidException reason) {
                 throw new UserDataInsufficientException(reason);
             }
