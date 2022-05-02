@@ -39,7 +39,7 @@ import java.util.Random;
 @Scope("singleton")
 public class UserAuthenticationBean {
 
-    private Logger log = LogManager.getLogger(UserAuthenticationBean.class);
+    private final Logger log = LogManager.getLogger(UserAuthenticationBean.class);
 
     @Autowired
     private UserManagement userManagement;
@@ -48,7 +48,7 @@ public class UserAuthenticationBean {
      * Caches auth tokens (for better performance). This Bean mainly works with the cache, so the database is only
      * accessed if the server restarted and the cache is gone.
      */
-    private Map<String, String> loggedInUsersCache = new HashMap<>();
+    private final Map<String, String> loggedInUsersCache = new HashMap<>();
 
     private static final String SECRET = "6a8c00720cbcbd95e3acc3c5a04345ed";
 
@@ -92,7 +92,7 @@ public class UserAuthenticationBean {
      * @author Daniel Mehlber
      */
     private String assembleJwtToken(final User user) throws InternalErrorException {
-        String jwtToken = "";
+        String jwtToken;
         try {
             Algorithm algorithm = Algorithm.HMAC256(SECRET);
             jwtToken = JWT.create()
@@ -110,10 +110,9 @@ public class UserAuthenticationBean {
     /**
      * Generate a random authentication token
      * @return random authentication token
-     * @throws InternalErrorException cannot generate new authenticaition token
      * @author Daniel Mehlber
      */
-    private String generateAuthenticationToken() throws InternalErrorException {
+    private String generateAuthenticationToken() {
         String chars = "0123456789ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijk"
                 +"lmnopqrstuvwxyz!@#$%&";
         Random rnd = new Random();

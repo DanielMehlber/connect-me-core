@@ -32,7 +32,7 @@ import org.springframework.web.util.HtmlUtils;
 @SessionScope
 public class StatefulRegistrationBean {
 
-    private Logger log = LogManager.getLogger(StatefulRegistrationBean.class);
+    private final Logger log = LogManager.getLogger(StatefulRegistrationBean.class);
 
     @Autowired
     private UserRepository userRepository;

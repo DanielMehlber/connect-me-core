@@ -13,6 +13,7 @@ import org.connectme.core.userManagement.entities.User;
 import org.connectme.core.userManagement.exceptions.UserDataInsufficientException;
 import org.connectme.core.userManagement.exceptions.UsernameAlreadyTakenException;
 import org.connectme.core.userManagement.impl.jpa.UserRepository;
+import org.connectme.core.userManagement.logic.SmsPhoneNumberVerification;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
@@ -261,7 +262,7 @@ public class RegistrationAPITest {
         StatefulRegistrationBean statefulRegistrationBean = extractRegistrationBeanFromSession(session);
 
         // 3) exceed the maximum amount of verification attempts
-        for(int i = 0; i < statefulRegistrationBean.getPhoneNumberVerification().getMaxVerificationAttempts(); i++) {
+        for(int i = 0; i < SmsPhoneNumberVerification.MAX_AMOUNT_VERIFICATION_ATTEMPTS; i++) {
             // 3.1) start verification process
             client.perform(post("/users/registration/start/verify")
                             .session(session))

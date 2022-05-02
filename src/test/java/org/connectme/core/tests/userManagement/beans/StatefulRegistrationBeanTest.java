@@ -8,6 +8,7 @@ import org.connectme.core.userManagement.entities.PassedUserData;
 import org.connectme.core.userManagement.exceptions.*;
 import org.connectme.core.userManagement.impl.jpa.UserRepository;
 import org.connectme.core.userManagement.logic.RegistrationState;
+import org.connectme.core.userManagement.logic.SmsPhoneNumberVerification;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.BeforeEach;
@@ -68,7 +69,7 @@ public class StatefulRegistrationBeanTest {
         statefulRegistrationBean.setUserData(TestUserDataRepository.assembleValidPassedUserData());
 
         // exceed max amount of allowed verifications attempts
-        for (int i = 0; i < statefulRegistrationBean.getPhoneNumberVerification().getMaxVerificationAttempts(); i++) {
+        for (int i = 0; i < SmsPhoneNumberVerification.MAX_AMOUNT_VERIFICATION_ATTEMPTS; i++) {
             statefulRegistrationBean.startAndWaitForVerification();
             try {
                 statefulRegistrationBean.checkVerificationCode("");
@@ -79,7 +80,7 @@ public class StatefulRegistrationBeanTest {
         Assertions.assertThrows(VerificationAttemptNotAllowedException.class, statefulRegistrationBean::startAndWaitForVerification);
 
         // reduce time to wait in order to complete unit test faster
-        statefulRegistrationBean.getPhoneNumberVerification().setLastVerificationAttempt(LocalDateTime.now().minusMinutes(statefulRegistrationBean.getPhoneNumberVerification().getBlockedVerificationDurationMinutes()));
+        statefulRegistrationBean.getPhoneNumberVerification().setLastVerificationAttempt(LocalDateTime.now().minusMinutes(SmsPhoneNumberVerification.BLOCK_FAILED_ATTEMPT_MINUTES));
 
         // try again (this time with the correct code)
         statefulRegistrationBean.startAndWaitForVerification();
@@ -102,7 +103,7 @@ public class StatefulRegistrationBeanTest {
         statefulRegistrationBean.setUserData(TestUserDataRepository.assembleValidPassedUserData());
 
         // exceed max attempt of verifications
-        for (int i = 0; i < statefulRegistrationBean.getPhoneNumberVerification().getMaxVerificationAttempts(); i++) {
+        for (int i = 0; i < SmsPhoneNumberVerification.MAX_AMOUNT_VERIFICATION_ATTEMPTS; i++) {
             statefulRegistrationBean.startAndWaitForVerification();
             try {
                 statefulRegistrationBean.checkVerificationCode("");

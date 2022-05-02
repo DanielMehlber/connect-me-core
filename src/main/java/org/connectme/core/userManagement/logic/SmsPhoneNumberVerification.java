@@ -15,7 +15,7 @@ import java.util.Random;
  */
 public class SmsPhoneNumberVerification {
 
-    private Logger log = LogManager.getLogger(SmsPhoneNumberVerification.class);
+    private final Logger log = LogManager.getLogger(SmsPhoneNumberVerification.class);
 
     /**
      * The maximum amount of verifications a user can attempt sequentially.
@@ -174,14 +174,4 @@ public class SmsPhoneNumberVerification {
     public void setLastVerificationAttempt(final LocalDateTime time) {
         lastVerificationAttempt = time;
     }
-
-    public int getMaxVerificationAttempts() {
-        return MAX_AMOUNT_VERIFICATION_ATTEMPTS;
-    }
-
-    
-    public int getBlockedVerificationDurationMinutes() {
-        return BLOCK_FAILED_ATTEMPT_MINUTES;
-    }
-
 }

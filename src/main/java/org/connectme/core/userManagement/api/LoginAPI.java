@@ -23,7 +23,7 @@ public class LoginAPI {
 
     public static final String SESSION_LOGIN = "session-login";
 
-    private Logger log = LogManager.getLogger(LoginAPI.class);
+    private final Logger log = LogManager.getLogger(LoginAPI.class);
 
     @Autowired
     private StatefulLoginBean statefulLoginBean;
@@ -128,7 +128,7 @@ public class LoginAPI {
         log.debug("phone number verification completed successfully");
 
         // phone number verification was successful: log in user
-        String jwtToken = "";
+        String jwtToken;
         try {
             User user = userManagement.fetchUserByUsername(statefulLoginBean.getLoginData().getUsername());
             jwtToken = authenticationUserBean.login(user);

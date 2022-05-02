@@ -22,7 +22,7 @@ public class JpaUserManagement implements UserManagement {
     @Autowired
     UserRepository userRepository;
 
-    private Logger log = LogManager.getLogger(UserManagement.class);
+    private final Logger log = LogManager.getLogger(UserManagement.class);
 
     @Override
     public boolean isUsernameAvailable(String username) throws RuntimeException, InternalErrorException {
