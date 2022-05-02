@@ -1,14 +1,17 @@
-package org.connectme.core.userManagement.logic;
+package org.connectme.core.userManagement.beans;
 
 import org.connectme.core.globalExceptions.ForbiddenInteractionException;
 import org.connectme.core.globalExceptions.InternalErrorException;
 import org.connectme.core.userManagement.UserManagement;
+import org.connectme.core.userManagement.api.LoginAPI;
 import org.connectme.core.userManagement.entities.PassedLoginData;
 import org.connectme.core.userManagement.entities.User;
 import org.connectme.core.userManagement.exceptions.NoSuchUserException;
 import org.connectme.core.userManagement.exceptions.VerificationAttemptNotAllowedException;
 import org.connectme.core.userManagement.exceptions.WrongPasswordException;
 import org.connectme.core.userManagement.exceptions.WrongVerificationCodeException;
+import org.connectme.core.userManagement.logic.LoginState;
+import org.connectme.core.userManagement.logic.SmsPhoneNumberVerification;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 import org.springframework.web.context.annotation.SessionScope;
@@ -17,7 +20,7 @@ import org.springframework.web.context.annotation.SessionScope;
  * This stateful bean is stored in session and holds all information and progress of
  * the users' login.
  */
-@Component
+@Component(LoginAPI.SESSION_LOGIN)
 @SessionScope
 public class StatefulLoginBean {
 

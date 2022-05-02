@@ -6,9 +6,11 @@ import org.connectme.core.globalExceptions.InternalErrorException;
 import org.connectme.core.userManagement.UserManagement;
 import org.connectme.core.userManagement.entities.User;
 import org.connectme.core.userManagement.exceptions.NoSuchUserException;
+import org.connectme.core.userManagement.exceptions.UserDataInsufficientException;
 import org.connectme.core.userManagement.exceptions.UsernameAlreadyTakenException;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Primary;
+import org.springframework.dao.DataIntegrityViolationException;
 import org.springframework.stereotype.Component;
 
 @SuppressWarnings("unused")
@@ -20,7 +22,7 @@ public class JpaUserManagement implements UserManagement {
     @Autowired
     UserRepository userRepository;
 
-    private Logger log = LogManager.getLogger(UserManagement.class);
+    private final Logger log = LogManager.getLogger(UserManagement.class);
 
     @Override
     public boolean isUsernameAvailable(String username) throws RuntimeException, InternalErrorException {
@@ -47,7 +49,7 @@ public class JpaUserManagement implements UserManagement {
     }
 
     @Override
-    public void createNewUser(User userdata) throws RuntimeException, InternalErrorException, UsernameAlreadyTakenException {
+    public void createNewUser(User userdata) throws RuntimeException, InternalErrorException, UsernameAlreadyTakenException, UserDataInsufficientException {
         log.debug("creating new user from userdata...");
         try {
             if (userRepository.existsById(userdata.getUsername())) {
@@ -56,6 +58,10 @@ public class JpaUserManagement implements UserManagement {
             } else {
                 userRepository.save(userdata);
             }
+        } catch (DataIntegrityViolationException e) {
+            // if database integrity rules or checks (data length, regex, etc.) are not met, this runtime exception is thrown
+            log.warn("cannot create new user because database does not accept passed user data: " + e.getMessage());
+            throw new UserDataInsufficientException(e);
         } catch (RuntimeException e) {
             log.error("cannot create new user: an unexpected runtime error occurred: " + e.getMessage());
             throw new InternalErrorException("cannot create new user", e);
@@ -64,7 +70,7 @@ public class JpaUserManagement implements UserManagement {
     }
 
     @Override
-    public void updateUserData(User userdata) throws RuntimeException, InternalErrorException, NoSuchUserException {
+    public void updateUserData(User userdata) throws RuntimeException, InternalErrorException, NoSuchUserException, UserDataInsufficientException {
         log.debug("updating user data of existing user...");
         try {
             if(!userRepository.existsById(userdata.getUsername())) {
@@ -73,6 +79,10 @@ public class JpaUserManagement implements UserManagement {
             } else {
                 userRepository.save(userdata);
             }
+        } catch (DataIntegrityViolationException e) {
+          // if database integrity rules or checks (data length, regex, etc.) are not met, this runtime exception is thrown
+          log.warn("cannot update user data because database does not accept passed user data: " + e.getMessage());
+          throw new UserDataInsufficientException(e);
         } catch (RuntimeException e) {
             log.error("cannot update user data: an unexpected runtime error occurred: " + e.getMessage());
             throw new InternalErrorException("cannot update user data", e);

@@ -1,13 +1,19 @@
 package org.connectme.core.tests.userManagement.api;
 
+import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
+import org.connectme.core.globalExceptions.InternalErrorException;
 import org.connectme.core.tests.userManagement.testUtil.TestUserDataRepository;
 import org.connectme.core.userManagement.UserManagement;
 import org.connectme.core.userManagement.api.RegistrationAPI;
+import org.connectme.core.userManagement.beans.StatefulRegistrationBean;
+import org.connectme.core.userManagement.entities.PassedLoginData;
 import org.connectme.core.userManagement.entities.PassedUserData;
 import org.connectme.core.userManagement.entities.User;
+import org.connectme.core.userManagement.exceptions.UserDataInsufficientException;
+import org.connectme.core.userManagement.exceptions.UsernameAlreadyTakenException;
 import org.connectme.core.userManagement.impl.jpa.UserRepository;
-import org.connectme.core.userManagement.logic.StatefulRegistrationBean;
+import org.connectme.core.userManagement.logic.SmsPhoneNumberVerification;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
@@ -17,8 +23,8 @@ import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.mock.web.MockHttpSession;
 import org.springframework.test.web.servlet.MockMvc;
 
-import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.*;
-import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.*;
+import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
+import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
 
 @SpringBootTest
@@ -256,7 +262,7 @@ public class RegistrationAPITest {
         StatefulRegistrationBean statefulRegistrationBean = extractRegistrationBeanFromSession(session);
 
         // 3) exceed the maximum amount of verification attempts
-        for(int i = 0; i < statefulRegistrationBean.getPhoneNumberVerification().getMaxVerificationAttempts(); i++) {
+        for(int i = 0; i < SmsPhoneNumberVerification.MAX_AMOUNT_VERIFICATION_ATTEMPTS; i++) {
             // 3.1) start verification process
             client.perform(post("/users/registration/start/verify")
                             .session(session))
@@ -324,6 +330,37 @@ public class RegistrationAPITest {
         MockHttpSession session = new MockHttpSession();
 
         String json = new ObjectMapper().writeValueAsString(userData);
+
+        // not allowed interactions
+        client.perform(post("/users/registration/set/userdata")
+                        .content(json)
+                        .contentType("application/json")
+                        .session(session))
+                .andExpect(status().isConflict());
+    }
+
+    @Test
+    public void attemptTakenPhoneNumber() throws Exception {
+        /*
+         * 1) create user in database with username
+         */
+        PassedUserData userData1 = TestUserDataRepository.assembleValidPassedUserData();
+        userManagement.createNewUser(new User(userData1));
+
+        // assemble userdata with different username
+        PassedUserData userData2;
+        do {
+            userData2 = TestUserDataRepository.assembleValidPassedUserData();
+        } while (userData2.getUsername().equals(userData1.getUsername()));
+        // set phone number of already existing user
+        userData2.setPhoneNumber(userData1.getPhoneNumber());
+
+        /*
+         * 2) try to create a new user with same username using API
+         */
+        MockHttpSession session = new MockHttpSession();
+
+        String json = new ObjectMapper().writeValueAsString(userData2);
 
         // not allowed interactions
         client.perform(post("/users/registration/set/userdata")

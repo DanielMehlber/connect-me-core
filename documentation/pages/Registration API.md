@@ -24,13 +24,14 @@
 	- ### Responses
 		- `OK` => Data checked and seccessfully set
 		- `BAD REQUEST` => Payload data in invalid or tests have failed {{cloze username not allowed, password too weak, invalid phone number, ...}}
-		- `CONFLICT` => Username already exists, choose an other one
+		- `CONFLICT` => Username already exists OR phone number is already taken
 		- `FORBIDDEN` => This interaction is not allowed in this registration step
 	- ### Actions
 		- Check all passed values and store them in session for later verification
 	- ### Patched Vulnerabilities
 		- pass invalid/malicious/unacceptable user data => input check/verification
 		- set user data again after verification process => check state
+		- TODO payload too _heavy_ => Restrict content size of HTTP request
 - # Start verification process (Step 3)
 	- POST `/users/registration/start/verify`
 	- No payload, just call
@@ -54,6 +55,8 @@
 		- Check if passed verification code equals actual verification code
 			- Yes: Create user object from registration and persist it
 			- No: increase failed attempt counter and return to Step 2 {{cloze the user has to call Step 3 (start verification process) and try again}} (see process documentation)
+	- ### Patched Vulnerabilities
+		- TODO payload too _heavy_ => Restrict content size of HTTP request
 	-
 - # Check username
 	- POST `/users/registration/check/username`

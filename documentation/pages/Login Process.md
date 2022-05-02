@@ -1,3 +1,6 @@
+- # Important
+	- Simple math: **each login costs money** (because of phone number verification) => minimize overall re-logins. For example at server restart => implement login state that **persists** (don't forget logged in users at server restart)
+	-
 - # Steps
 	- 1) user starts the login process
 	- 2) user enters login data (username, password)
@@ -18,5 +21,7 @@
 		- Repeat verification process infinite times => restrict attempts per time (**Verification Block**)
 			- e.g. limit of 3 attempts. User will be blocked for 5mins after those
 		- Bypass verification block by restarting (=resetting) statefulRegistrationBean process => keep statefulRegistrationBean object in session and check if process restart/reset is allowed
-		-
-		-
+- # API
+	- {{embed [[Login API]]}}
+- # Authentication
+	- {{embed [[Authentication]]}}

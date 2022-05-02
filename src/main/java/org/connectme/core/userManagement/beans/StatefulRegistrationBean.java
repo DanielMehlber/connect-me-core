@@ -1,13 +1,21 @@
-package org.connectme.core.userManagement.logic;
+package org.connectme.core.userManagement.beans;
 
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
 import org.connectme.core.globalExceptions.ForbiddenInteractionException;
+import org.connectme.core.globalExceptions.InternalErrorException;
+import org.connectme.core.userManagement.UserManagement;
 import org.connectme.core.userManagement.api.RegistrationAPI;
 import org.connectme.core.userManagement.entities.PassedUserData;
-import org.connectme.core.userManagement.exceptions.*;
 import org.connectme.core.userManagement.entities.User;
-
+import org.connectme.core.userManagement.exceptions.*;
+import org.connectme.core.userManagement.impl.jpa.UserRepository;
+import org.connectme.core.userManagement.logic.RegistrationState;
+import org.connectme.core.userManagement.logic.SmsPhoneNumberVerification;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 import org.springframework.web.context.annotation.SessionScope;
+import org.springframework.web.util.HtmlUtils;
 
 /**
  * Because of various verification steps along the registration process this application keeps the
@@ -23,6 +31,14 @@ import org.springframework.web.context.annotation.SessionScope;
 @Component(RegistrationAPI.SESSION_REGISTRATION)
 @SessionScope
 public class StatefulRegistrationBean {
+
+    private final Logger log = LogManager.getLogger(StatefulRegistrationBean.class);
+
+    @Autowired
+    private UserRepository userRepository;
+
+    @Autowired
+    private UserManagement userManagement;
 
     private PassedUserData passedUserData;
 
@@ -48,27 +64,50 @@ public class StatefulRegistrationBean {
     }
 
     /**
-     * Invokes state after a valid username and secure password have been entered.
-     *
-     * PREVIOUS STEP: Registration has been created
-     * NEXT STEP: user will enter his phone number
+     * Checks syntax and availability of the received user data.
      *
      * @param passedUserData user data passed by the user himself. It will be checked in this step.
      * @throws ForbiddenInteractionException this instance is currently in a different state and awaits different interactions
      * @throws UserDataInsufficientException the user data was checked and declared insufficient or invalid
+     * @throws PhoneNumberAlreadyInUseException the passed phone number cannot be used because it is already taken
+     * @throws UsernameAlreadyTakenException the passed username is not available because it is already taken
+     * @throws InternalErrorException an unexpected internal error occurred
      * @author Daniel Mehlber
      * @see PassedUserData#check()
      */
-    public void setUserData(final PassedUserData passedUserData) throws ForbiddenInteractionException, UserDataInsufficientException {
+    public void setUserData(final PassedUserData passedUserData) throws ForbiddenInteractionException, UserDataInsufficientException, PhoneNumberAlreadyInUseException, UsernameAlreadyTakenException, InternalErrorException {
         if(state != RegistrationState.CREATED)
             throw new ForbiddenInteractionException(
                     String.format("registration is in state %s and cannot accept user data", state.name()));
         else {
             // perform value check
             try {
+
+                // check user data syntactically
                 passedUserData.check();
+
+                /*
+                 * the availability of the username will be checked here.
+                 * It's checked after it is confirmed to be allowed in any other ways on purpose.
+                 */
+                if (!userManagement.isUsernameAvailable(passedUserData.getUsername())) {
+                    log.warn(String.format("user data upload failed: username '%s' is already taken and therefor not available", HtmlUtils.htmlEscape(passedUserData.getUsername())));
+                    // if user data is invalid, reset to remove user data from registration
+                    reset();
+                    throw new UsernameAlreadyTakenException();
+                }
+
+                // check if phone number is already in use by another user
+                if(userRepository.existsByPhoneNumber(passedUserData.getPhoneNumber())) {
+                    log.warn(String.format("user data upload failed: phone number '%s' is already in use and cannot be taken twice", HtmlUtils.htmlEscape(passedUserData.getPhoneNumber())));
+                    throw new PhoneNumberAlreadyInUseException();
+                }
+
             } catch (final PasswordTooWeakException | UsernameNotAllowedException | PhoneNumberInvalidException reason) {
                 throw new UserDataInsufficientException(reason);
+            } catch (final InternalErrorException e) {
+                log.error("cannot set user data because of an unexpected internal error: " + e.getMessage());
+                throw e;
             }
 
             this.passedUserData = passedUserData;
@@ -99,7 +138,7 @@ public class StatefulRegistrationBean {
 
             phoneNumberVerification.startVerificationAttempt();
             state = RegistrationState.WAITING_FOR_PHONE_NUMBER_VERIFICATION;
-
+            log.debug("phone number verification attempt started");
         }
     }
 
@@ -141,18 +180,20 @@ public class StatefulRegistrationBean {
     public void checkVerificationCode(final String passedVerificationCode) throws ForbiddenInteractionException, WrongVerificationCodeException {
         if(state != RegistrationState.WAITING_FOR_PHONE_NUMBER_VERIFICATION)
             throw new ForbiddenInteractionException(
-                    String.format("registration is in state %s and cannot accept verification codes", state.name()));
+                    String.format("registration is in state %s and cannot accept verification code", state.name()));
         else {
             // check verification code
             try {
                 phoneNumberVerification.checkVerificationCode(passedVerificationCode);
             } catch (final WrongVerificationCodeException e) {
                 // CASE: wrong verification code, user must reenter verification process
+                log.warn(String.format("phone number verification failed: user passed incorrect verification code '%s'", passedVerificationCode));
                 state = RegistrationState.USER_DATA_PASSED;
                 throw e;
             }
 
             // CASE: correct verification code has been entered
+            log.debug("phone number verification code check successful");
             state = RegistrationState.USER_VERIFIED;
         }
 

@@ -7,6 +7,7 @@ import org.connectme.core.userManagement.UserManagement;
 import org.connectme.core.userManagement.entities.PassedUserData;
 import org.connectme.core.userManagement.entities.User;
 import org.connectme.core.userManagement.exceptions.NoSuchUserException;
+import org.connectme.core.userManagement.exceptions.UserDataInsufficientException;
 import org.connectme.core.userManagement.exceptions.UsernameAlreadyTakenException;
 import org.connectme.core.userManagement.impl.jpa.UserRepository;
 import org.junit.jupiter.api.Assertions;
@@ -31,7 +32,7 @@ public class UserManagementTest {
     private UserRepository userRepository;
 
     @Test
-    public void testCreateUser() throws InternalErrorException, UsernameAlreadyTakenException, NoSuchUserException {
+    public void testCreateUser() throws InternalErrorException, UsernameAlreadyTakenException, NoSuchUserException, UserDataInsufficientException {
         PassedUserData userdata = TestUserDataRepository.assembleValidPassedUserData();
         User user = new User(userdata);
 
@@ -45,7 +46,7 @@ public class UserManagementTest {
     }
 
     @Test
-    public void testUpdateUser() throws InternalErrorException, UsernameAlreadyTakenException, NoSuchUserException {
+    public void testUpdateUser() throws InternalErrorException, UsernameAlreadyTakenException, NoSuchUserException, UserDataInsufficientException {
         PassedUserData originalUserData = TestUserDataRepository.assembleValidPassedUserData();
         User user = new User(originalUserData);
 
@@ -69,7 +70,7 @@ public class UserManagementTest {
     }
 
     @Test
-    public void testDeleteUser() throws InternalErrorException, UsernameAlreadyTakenException, NoSuchUserException {
+    public void testDeleteUser() throws InternalErrorException, UsernameAlreadyTakenException, NoSuchUserException, UserDataInsufficientException {
         PassedUserData originalUserData = TestUserDataRepository.assembleValidPassedUserData();
         User user = new User(originalUserData);
 
@@ -84,7 +85,7 @@ public class UserManagementTest {
     }
 
     @Test
-    public void testIsUsernameAvailable() throws InternalErrorException, UsernameAlreadyTakenException {
+    public void testIsUsernameAvailable() throws InternalErrorException, UsernameAlreadyTakenException, UserDataInsufficientException {
         PassedUserData originalUserData = TestUserDataRepository.assembleValidPassedUserData();
         User user = new User(originalUserData);
 
@@ -109,7 +110,7 @@ public class UserManagementTest {
     }
 
     @Test
-    public void attemptCreateUserWithTakenUsername() throws InternalErrorException, UsernameAlreadyTakenException {
+    public void attemptCreateUserWithTakenUsername() throws InternalErrorException, UsernameAlreadyTakenException, UserDataInsufficientException {
         PassedUserData userData = TestUserDataRepository.assembleValidPassedUserData();
         User user = new User(userData);
 
