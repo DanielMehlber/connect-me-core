@@ -17,7 +17,7 @@
 		- Wrong verification code (typo) => Repeat verification process
 	- ## Actions of the clumsy user
 		- Ends statefulRegistrationBean mid process => No database persistence along this process, store in session
-		- TODO phone number is already in use for an other account
+		- phone number is already in use for an other account => Check if phone number is already in use
 	- ## Inputs of the evil user
 		- code injection => charset limitation and syntax checking
 		- TODO too long inputs => limit input length

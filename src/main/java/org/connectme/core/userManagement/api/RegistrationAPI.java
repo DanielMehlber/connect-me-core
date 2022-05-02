@@ -80,19 +80,11 @@ public class RegistrationAPI {
             } catch (PhoneNumberAlreadyInUseException e) {
                 log.warn("user data rejected: the passed phone number is already in use");
                 throw e;
+            } catch (UsernameAlreadyTakenException e) {
+                log.warn("user data rejected due to unavailable username: " + e.getMessage());
+                throw e;
             }
 
-
-            /*
-             * the availability of the username will be checked here.
-             * It's checked after it is confirmed to be allowed in any other ways on purpose.
-             */
-            if (!userManagement.isUsernameAvailable(userData.getUsername())) {
-                log.warn("user data upload failed: username is already taken and therefor not available");
-                // if user data is invalid, reset to remove user data from registration
-                registration.reset();
-                throw new UsernameAlreadyTakenException();
-            }
         } catch (InternalErrorException e) {
             log.fatal("user data upload for registration failed due to an internal error", e);
             throw e;
@@ -159,7 +151,8 @@ public class RegistrationAPI {
              */
             final User newUser = new User(registration.getPassedUserData());
             userManagement.createNewUser(newUser);
-            //             ^^^^^^^^^^^^^ may throw UsernameAlreadyTakenException
+
+            log.info(String.format("registration of new user '%s' was successful", newUser.getUsername()));
         } catch (InternalErrorException e) {
             log.warn("cannot create new user due to an internal error: " + e.getMessage());
             throw e;
@@ -176,6 +169,7 @@ public class RegistrationAPI {
         }
 
         log.info("created new user in database successfully");
+
     }
 
 }

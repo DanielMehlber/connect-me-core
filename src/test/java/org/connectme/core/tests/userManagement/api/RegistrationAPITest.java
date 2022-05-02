@@ -1,12 +1,17 @@
 package org.connectme.core.tests.userManagement.api;
 
+import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
+import org.connectme.core.globalExceptions.InternalErrorException;
 import org.connectme.core.tests.userManagement.testUtil.TestUserDataRepository;
 import org.connectme.core.userManagement.UserManagement;
 import org.connectme.core.userManagement.api.RegistrationAPI;
 import org.connectme.core.userManagement.beans.StatefulRegistrationBean;
+import org.connectme.core.userManagement.entities.PassedLoginData;
 import org.connectme.core.userManagement.entities.PassedUserData;
 import org.connectme.core.userManagement.entities.User;
+import org.connectme.core.userManagement.exceptions.UserDataInsufficientException;
+import org.connectme.core.userManagement.exceptions.UsernameAlreadyTakenException;
 import org.connectme.core.userManagement.impl.jpa.UserRepository;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.BeforeEach;
@@ -333,5 +338,34 @@ public class RegistrationAPITest {
                 .andExpect(status().isConflict());
     }
 
-    // TODO: assert that a user cannot enter a phone number that is already in use by another user
+    @Test
+    public void attemptTakenPhoneNumber() throws Exception {
+        /*
+         * 1) create user in database with username
+         */
+        PassedUserData userData1 = TestUserDataRepository.assembleValidPassedUserData();
+        userManagement.createNewUser(new User(userData1));
+
+        // assemble userdata with different username
+        PassedUserData userData2;
+        do {
+            userData2 = TestUserDataRepository.assembleValidPassedUserData();
+        } while (userData2.getUsername().equals(userData1.getUsername()));
+        // set phone number of already existing user
+        userData2.setPhoneNumber(userData1.getPhoneNumber());
+
+        /*
+         * 2) try to create a new user with same username using API
+         */
+        MockHttpSession session = new MockHttpSession();
+
+        String json = new ObjectMapper().writeValueAsString(userData2);
+
+        // not allowed interactions
+        client.perform(post("/users/registration/set/userdata")
+                        .content(json)
+                        .contentType("application/json")
+                        .session(session))
+                .andExpect(status().isConflict());
+    }
 }

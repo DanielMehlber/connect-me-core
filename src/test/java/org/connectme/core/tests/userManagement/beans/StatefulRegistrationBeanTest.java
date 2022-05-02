@@ -1,13 +1,11 @@
 package org.connectme.core.tests.userManagement.beans;
 
 import org.connectme.core.globalExceptions.ForbiddenInteractionException;
+import org.connectme.core.globalExceptions.InternalErrorException;
 import org.connectme.core.tests.userManagement.testUtil.TestUserDataRepository;
 import org.connectme.core.userManagement.beans.StatefulRegistrationBean;
 import org.connectme.core.userManagement.entities.PassedUserData;
-import org.connectme.core.userManagement.exceptions.PhoneNumberAlreadyInUseException;
-import org.connectme.core.userManagement.exceptions.UserDataInsufficientException;
-import org.connectme.core.userManagement.exceptions.VerificationAttemptNotAllowedException;
-import org.connectme.core.userManagement.exceptions.WrongVerificationCodeException;
+import org.connectme.core.userManagement.exceptions.*;
 import org.connectme.core.userManagement.impl.jpa.UserRepository;
 import org.connectme.core.userManagement.logic.RegistrationState;
 import org.junit.jupiter.api.Assertions;
@@ -34,7 +32,7 @@ public class StatefulRegistrationBeanTest {
     }
 
     @Test
-    public void happyPath() throws VerificationAttemptNotAllowedException, WrongVerificationCodeException, ForbiddenInteractionException, UserDataInsufficientException, PhoneNumberAlreadyInUseException {
+    public void happyPath() throws VerificationAttemptNotAllowedException, WrongVerificationCodeException, ForbiddenInteractionException, UserDataInsufficientException, PhoneNumberAlreadyInUseException, InternalErrorException, UsernameAlreadyTakenException {
         /*
          * SCENARIO: go through happy path of registration process
          */
@@ -57,7 +55,7 @@ public class StatefulRegistrationBeanTest {
     }
 
     @Test
-    public void exceedVerificationLimit() throws VerificationAttemptNotAllowedException, WrongVerificationCodeException, ForbiddenInteractionException, UserDataInsufficientException, PhoneNumberAlreadyInUseException {
+    public void exceedVerificationLimit() throws VerificationAttemptNotAllowedException, WrongVerificationCodeException, ForbiddenInteractionException, UserDataInsufficientException, PhoneNumberAlreadyInUseException, InternalErrorException, UsernameAlreadyTakenException {
         /*
          * SCENARIO: evil or clumsy user enters wrong verification code too often and has to wait for a certain amount
          * of time. The amount of verification attempts per time has to be limited because SMS costs money.
@@ -90,7 +88,7 @@ public class StatefulRegistrationBeanTest {
     }
 
     @Test
-    public void attemptProcessRestartWhileVerificationBlock() throws VerificationAttemptNotAllowedException, ForbiddenInteractionException, UserDataInsufficientException, PhoneNumberAlreadyInUseException {
+    public void attemptProcessRestartWhileVerificationBlock() throws VerificationAttemptNotAllowedException, ForbiddenInteractionException, UserDataInsufficientException, PhoneNumberAlreadyInUseException, InternalErrorException, UsernameAlreadyTakenException {
         /*
          * SCENARIO: evil user tries to send infinite verification SMS in order to harm us:
          * After he attempted too many verifications he must wait. To bypass that, he tries to reset the
@@ -119,7 +117,7 @@ public class StatefulRegistrationBeanTest {
     }
 
     @Test
-    public void attemptIllegalInteractionsToStates() throws WrongVerificationCodeException, VerificationAttemptNotAllowedException, ForbiddenInteractionException, UserDataInsufficientException, PhoneNumberAlreadyInUseException {
+    public void attemptIllegalInteractionsToStates() throws WrongVerificationCodeException, VerificationAttemptNotAllowedException, ForbiddenInteractionException, UserDataInsufficientException, PhoneNumberAlreadyInUseException, InternalErrorException, UsernameAlreadyTakenException {
         /*
          * SCENARIO: In every state of the registration only certain interactions are allowed.
          *
