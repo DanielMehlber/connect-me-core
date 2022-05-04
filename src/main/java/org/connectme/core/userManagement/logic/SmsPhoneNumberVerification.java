@@ -127,7 +127,7 @@ public class SmsPhoneNumberVerification {
             log.warn(String.format("passed verification code '%s' was wrong", HtmlUtils.htmlEscape(passedVerificationCode)));
             verified = false;
             verificationCode = null;
-            throw new WrongVerificationCodeException();
+            throw new WrongVerificationCodeException(passedVerificationCode);
         }
 
         // clear verification code

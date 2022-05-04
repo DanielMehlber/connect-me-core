@@ -101,10 +101,10 @@ public class PassedUserData {
      */
     public static void checkUsernameValue(final String passedUsername) throws UsernameNotAllowedException {
         if(passedUsername.length() > MAX_USERNAME_LENGTH || passedUsername.length() < MIN_USERNAME_LENGTH)
-            throw new UsernameNotAllowedException(UsernameNotAllowedException.Reason.LENGTH);
+            throw new UsernameNotAllowedException(passedUsername, UsernameNotAllowedException.Reason.LENGTH);
         else if (!passedUsername.matches("^[a-zA-Z0-9-_]*$"))
             //                                  ^^^^^^^^^^^^^^^^ allow only A-Z, a-z, 0-9, -_
-            throw new UsernameNotAllowedException(UsernameNotAllowedException.Reason.SYNTAX);
+            throw new UsernameNotAllowedException(passedUsername, UsernameNotAllowedException.Reason.SYNTAX);
 
         // TODO: Profanity Check
     }
@@ -152,10 +152,10 @@ public class PassedUserData {
 
     private static void checkPhoneNumber(final String phoneNumber) throws PhoneNumberInvalidException {
         if(phoneNumber.length() > 15)
-            throw new PhoneNumberInvalidException("phone number is too long");
+            throw new PhoneNumberInvalidException(phoneNumber, "phone number is too long");
 
         if(!phoneNumber.matches("^\\d+$"))
-            throw new PhoneNumberInvalidException("phone number does not only contain digits");
+            throw new PhoneNumberInvalidException(phoneNumber, "phone number does not only contain digits");
     }
 
     @Override

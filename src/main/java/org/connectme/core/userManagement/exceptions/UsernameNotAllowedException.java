@@ -1,5 +1,7 @@
 package org.connectme.core.userManagement.exceptions;
 
+import org.springframework.web.util.HtmlUtils;
+
 public class UsernameNotAllowedException extends Exception{
 
     public enum Reason {
@@ -8,10 +10,7 @@ public class UsernameNotAllowedException extends Exception{
         LENGTH
     }
 
-    public UsernameNotAllowedException(final Reason reason) {
-        /*
-         * SECURITY: Do NOT log username, it is raw user input and could be harmful (see Log-Injection).
-         */
-        super(String.format("the provided username cannot be accepted: %s", reason.name()));
+    public UsernameNotAllowedException(final String username, final Reason reason) {
+        super(String.format("the provided username '%s' cannot be accepted: %s", HtmlUtils.htmlEscape(username), reason.name()));
     }
 }

@@ -1,5 +1,7 @@
 package org.connectme.core.userManagement.beans;
 
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
 import org.connectme.core.globalExceptions.ForbiddenInteractionException;
 import org.connectme.core.globalExceptions.InternalErrorException;
 import org.connectme.core.userManagement.UserManagement;
@@ -15,6 +17,7 @@ import org.connectme.core.userManagement.logic.SmsPhoneNumberVerification;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 import org.springframework.web.context.annotation.SessionScope;
+import org.springframework.web.util.HtmlUtils;
 
 /**
  * This stateful bean is stored in session and holds all information and progress of
@@ -23,6 +26,8 @@ import org.springframework.web.context.annotation.SessionScope;
 @Component(LoginAPI.SESSION_LOGIN)
 @SessionScope
 public class StatefulLoginBean {
+
+    private Logger log = LogManager.getLogger(StatefulLoginBean.class);
 
     @Autowired
     private UserManagement userManagement;
@@ -57,6 +62,8 @@ public class StatefulLoginBean {
      */
     public void reset() throws ForbiddenInteractionException {
         if(!isResetAllowed()) {
+            log.warn(String.format("illegal access attempt: login reset is currently not allowed (current state: %s)",
+                    state.name()));
             throw new ForbiddenInteractionException("reset is currently not allowed");
         } else {
             state = LoginState.INIT;
@@ -91,17 +98,22 @@ public class StatefulLoginBean {
      * @author Daniel Mehlber
      */
     public void passLoginData(final PassedLoginData passedLoginData) throws ForbiddenInteractionException, NoSuchUserException, WrongPasswordException, InternalErrorException {
-        if(state != LoginState.INIT)
+        if(state != LoginState.INIT) {
+            log.warn(String.format("illegal access attempt: login is in state '%s' and cannot accept user data", state.name()));
             throw new ForbiddenInteractionException(String.format("cannot pass login data because login is in state %s", state.name()));
+        }
 
         // try to load userdata
         User user = userManagement.fetchUserByUsername(passedLoginData.getUsername());
+        log.debug(String.format("user with username '%s' successfully loaded", HtmlUtils.htmlEscape(passedLoginData.getUsername())));
 
         // check if password is correct
         if(user.getPasswordHash().equals(passedLoginData.getPasswordHash())) {
             state = LoginState.CORRECT_LOGIN_DATA_PASSED;
             this.loginData = passedLoginData;
+            log.debug(String.format("user '%s' entered correct password", passedLoginData.getUsername()));
         } else {
+            log.warn(String.format("user '%s' entered wrong password", passedLoginData.getUsername()));
             throw new WrongPasswordException();
         }
     }
@@ -115,12 +127,14 @@ public class StatefulLoginBean {
      * @author Daniel Mehlber
      */
     public void startAndWaitForVerification() throws ForbiddenInteractionException, VerificationAttemptNotAllowedException {
-        if (state != LoginState.CORRECT_LOGIN_DATA_PASSED)
+        if (state != LoginState.CORRECT_LOGIN_DATA_PASSED) {
+            log.warn(String.format("illegal access attempt: login is in state %s and cannot start phone number verification", state.name()));
             throw new ForbiddenInteractionException(
-                    String.format("registration is in state %s and cannot wait for phone number verification", state.name()));
-        else {
+                    String.format("login is in state %s and cannot start phone number verification", state.name()));
+        } else {
             phoneNumberVerification.startVerificationAttempt();
             state = LoginState.VERIFICATION_PENDING;
+            log.info(String.format("user '%s' started phone number verification process in login", loginData.getUsername()));
         }
     }
 
@@ -133,21 +147,25 @@ public class StatefulLoginBean {
      * @author Daniel Mehlber
      */
     public void checkVerificationCode(final String passedVerificationCode) throws ForbiddenInteractionException, WrongVerificationCodeException {
-        if(state != LoginState.VERIFICATION_PENDING)
+        if(state != LoginState.VERIFICATION_PENDING) {
+            log.warn(String.format("illegal access attempt: login is in state %s and cannot accept verification codes", state.name()));
             throw new ForbiddenInteractionException(
-                    String.format("registration is in state %s and cannot accept verification codes", state.name()));
+                    String.format("login is in state %s and cannot accept verification codes", state.name()));
+        }
         else {
             // check verification code
             try {
                 phoneNumberVerification.checkVerificationCode(passedVerificationCode);
             } catch (final WrongVerificationCodeException e) {
                 // CASE: wrong verification code, user must reenter verification process
+                log.warn("user passed wrong verification code: " + e.getMessage());
                 state = LoginState.CORRECT_LOGIN_DATA_PASSED;
                 throw e;
             }
 
             // CASE: correct verification code has been entered
             state = LoginState.PROFILE_VERIFIED;
+            log.info("user passed correct verification code");
         }
 
     }

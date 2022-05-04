@@ -76,10 +76,12 @@ public class StatefulRegistrationBean {
      * @see PassedUserData#check()
      */
     public void setUserData(final PassedUserData passedUserData) throws ForbiddenInteractionException, UserDataInsufficientException, PhoneNumberAlreadyInUseException, UsernameAlreadyTakenException, InternalErrorException {
-        if(state != RegistrationState.CREATED)
+        // at first check if this interaction is allowed in the current state of this bean
+        if(state != RegistrationState.CREATED) {
+            log.warn(String.format("illegal access attempt: registration is in state %s and cannot accept user data", state.name()));
             throw new ForbiddenInteractionException(
                     String.format("registration is in state %s and cannot accept user data", state.name()));
-        else {
+        } else {
             // perform value check
             try {
 
@@ -94,22 +96,24 @@ public class StatefulRegistrationBean {
                     log.warn(String.format("user data upload failed: username '%s' is already taken and therefor not available", HtmlUtils.htmlEscape(passedUserData.getUsername())));
                     // if user data is invalid, reset to remove user data from registration
                     reset();
-                    throw new UsernameAlreadyTakenException();
+                    throw new UsernameAlreadyTakenException(passedUserData.getUsername());
                 }
 
                 // check if phone number is already in use by another user
                 if(userRepository.existsByPhoneNumber(passedUserData.getPhoneNumber())) {
                     log.warn(String.format("user data upload failed: phone number '%s' is already in use and cannot be taken twice", HtmlUtils.htmlEscape(passedUserData.getPhoneNumber())));
-                    throw new PhoneNumberAlreadyInUseException();
+                    throw new PhoneNumberAlreadyInUseException(passedUserData.getPhoneNumber());
                 }
 
             } catch (final PasswordTooWeakException | UsernameNotAllowedException | PhoneNumberInvalidException reason) {
+                log.warn("provided user data was not sufficient: " + reason.getMessage());
                 throw new UserDataInsufficientException(reason);
             } catch (final InternalErrorException e) {
                 log.error("cannot set user data because of an unexpected internal error: " + e.getMessage());
                 throw e;
             }
 
+            log.debug("user passed user data for registration");
             this.passedUserData = passedUserData;
             state = RegistrationState.USER_DATA_PASSED;
         }
@@ -131,15 +135,19 @@ public class StatefulRegistrationBean {
      * @author Daniel Mehlber
      */
     public void startAndWaitForVerification() throws ForbiddenInteractionException, VerificationAttemptNotAllowedException {
-        if (state != RegistrationState.USER_DATA_PASSED)
+        // at first check if this interaction is allowed in the current state of this bean
+        if (state != RegistrationState.USER_DATA_PASSED) {
+            log.warn(String.format("illegal access attempt: registration is in state %s and cannot start phone number verification process",
+                    state.name()));
             throw new ForbiddenInteractionException(
                     String.format("registration is in state %s and cannot wait for phone number verification", state.name()));
-        else {
-
-            phoneNumberVerification.startVerificationAttempt();
-            state = RegistrationState.WAITING_FOR_PHONE_NUMBER_VERIFICATION;
-            log.debug("phone number verification attempt started");
         }
+
+        // try to start verification attempt (may fail)
+        phoneNumberVerification.startVerificationAttempt();
+        state = RegistrationState.WAITING_FOR_PHONE_NUMBER_VERIFICATION;
+        log.debug("phone number verification attempt started");
+
     }
 
 
@@ -178,9 +186,12 @@ public class StatefulRegistrationBean {
      * @author Daniel Mehlber
      */
     public void checkVerificationCode(final String passedVerificationCode) throws ForbiddenInteractionException, WrongVerificationCodeException {
-        if(state != RegistrationState.WAITING_FOR_PHONE_NUMBER_VERIFICATION)
+        // at first check if this interaction is allowed in the current state of this bean
+        if(state != RegistrationState.WAITING_FOR_PHONE_NUMBER_VERIFICATION) {
+            log.warn(String.format("illegal access attempt: registration is in state %s and cannot check verification code", state.name()));
             throw new ForbiddenInteractionException(
                     String.format("registration is in state %s and cannot accept verification code", state.name()));
+        }
         else {
             // check verification code
             try {
@@ -216,8 +227,11 @@ public class StatefulRegistrationBean {
             state = RegistrationState.CREATED;
             passedUserData = null;
         } else {
+            log.warn("illegal reset attempt: resetting the registration is currently not allowed");
             throw new ForbiddenInteractionException("a reset is currently not allowed/blocked");
         }
+
+        log.info("a new registration has been initialized or reset");
     }
 
     public PassedUserData getPassedUserData() {

@@ -12,6 +12,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Primary;
 import org.springframework.dao.DataIntegrityViolationException;
 import org.springframework.stereotype.Component;
+import org.springframework.web.util.HtmlUtils;
 
 @SuppressWarnings("unused")
 @Component("JpaUserManagement")
@@ -25,7 +26,7 @@ public class JpaUserManagement implements UserManagement {
     private final Logger log = LogManager.getLogger(UserManagement.class);
 
     @Override
-    public boolean isUsernameAvailable(String username) throws RuntimeException, InternalErrorException {
+    public boolean isUsernameAvailable(final String username) throws RuntimeException, InternalErrorException {
         log.debug("checking if username is available...");
         try {
             boolean isAvailable = !userRepository.existsById(username);
@@ -38,10 +39,10 @@ public class JpaUserManagement implements UserManagement {
     }
 
     @Override
-    public User fetchUserByUsername(String username) throws RuntimeException, InternalErrorException, NoSuchUserException {
+    public User fetchUserByUsername(final String username) throws RuntimeException, InternalErrorException, NoSuchUserException {
         log.debug("fetching user by username...");
         try {
-            return userRepository.findById(username).orElseThrow(NoSuchUserException::new);
+            return userRepository.findById(username).orElseThrow(() -> new NoSuchUserException(username));
         } catch (RuntimeException e) {
             log.error("cannot fetch user by username: an unexpected runtime error occurred: " + e.getMessage());
             throw new InternalErrorException("cannot fetch user by id", e);
@@ -49,33 +50,37 @@ public class JpaUserManagement implements UserManagement {
     }
 
     @Override
-    public void createNewUser(User userdata) throws RuntimeException, InternalErrorException, UsernameAlreadyTakenException, UserDataInsufficientException {
+    public void createNewUser(final User userdata) throws RuntimeException, InternalErrorException, UsernameAlreadyTakenException, UserDataInsufficientException {
         log.debug("creating new user from userdata...");
         try {
             if (userRepository.existsById(userdata.getUsername())) {
-                log.warn("cannot create user with passed username because it is already taken");
-                throw new UsernameAlreadyTakenException();
+                log.warn(String.format("cannot create user with username '%s' because it is already taken",
+                        HtmlUtils.htmlEscape(userdata.getUsername())));
+                throw new UsernameAlreadyTakenException(userdata.getUsername());
             } else {
                 userRepository.save(userdata);
             }
         } catch (DataIntegrityViolationException e) {
             // if database integrity rules or checks (data length, regex, etc.) are not met, this runtime exception is thrown
-            log.warn("cannot create new user because database does not accept passed user data: " + e.getMessage());
+            log.warn(String.format("cannot create new user '%s' because database does not accept passed user data: %s",
+                    HtmlUtils.htmlEscape(userdata.getUsername()), e.getMessage()));
             throw new UserDataInsufficientException(e);
         } catch (RuntimeException e) {
-            log.error("cannot create new user: an unexpected runtime error occurred: " + e.getMessage());
+            log.error(String.format("cannot create new user '%s': an unexpected runtime error occurred: %s"),
+                    HtmlUtils.htmlEscape(userdata.getUsername()), e.getMessage());
             throw new InternalErrorException("cannot create new user", e);
         }
-        log.debug("successfully created new user and persisted it in database");
+        log.debug(String.format("successfully created new user '%s' and persisted it in database",
+                HtmlUtils.htmlEscape(userdata.getUsername())));
     }
 
     @Override
-    public void updateUserData(User userdata) throws RuntimeException, InternalErrorException, NoSuchUserException, UserDataInsufficientException {
+    public void updateUserData(final User userdata) throws RuntimeException, InternalErrorException, NoSuchUserException, UserDataInsufficientException {
         log.debug("updating user data of existing user...");
         try {
             if(!userRepository.existsById(userdata.getUsername())) {
                 log.warn("cannot update user data because user does not exist");
-                throw new NoSuchUserException();
+                throw new NoSuchUserException(userdata.getUsername());
             } else {
                 userRepository.save(userdata);
             }
@@ -91,12 +96,12 @@ public class JpaUserManagement implements UserManagement {
     }
 
     @Override
-    public void deleteUser(String username) throws RuntimeException, InternalErrorException, NoSuchUserException {
+    public void deleteUser(final String username) throws RuntimeException, InternalErrorException, NoSuchUserException {
         log.debug("deleting user data of user with passed username");
         try {
             if(!userRepository.existsById(username)) {
                 log.warn("cannot delete user data because user does not exist");
-                throw new NoSuchUserException();
+                throw new NoSuchUserException(username);
             } else {
                 userRepository.deleteById(username);
             }

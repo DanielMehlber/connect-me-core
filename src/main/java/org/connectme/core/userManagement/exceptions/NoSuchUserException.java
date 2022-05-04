@@ -3,6 +3,7 @@ package org.connectme.core.userManagement.exceptions;
 
 import org.springframework.http.HttpStatus;
 import org.springframework.web.bind.annotation.ResponseStatus;
+import org.springframework.web.util.HtmlUtils;
 
 /**
  * This exception is thrown if there is no user data for a passed username
@@ -10,11 +11,8 @@ import org.springframework.web.bind.annotation.ResponseStatus;
 @ResponseStatus(HttpStatus.UNAUTHORIZED)
 public class NoSuchUserException extends Exception {
 
-    public NoSuchUserException() {
-        /*
-         * SECURITY: Do NOT log username, it is raw user input and could be harmful (see Log-Injection)
-         */
-        super("requested user with passed username does not exist");
+    public NoSuchUserException(final String username) {
+        super(String.format("requested user with username '%s' does not exist", HtmlUtils.htmlEscape(username)));
     }
 
 }
