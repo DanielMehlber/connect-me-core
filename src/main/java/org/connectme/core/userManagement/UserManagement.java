@@ -1,6 +1,6 @@
 package org.connectme.core.userManagement;
 
-import org.connectme.core.globalExceptions.InternalErrorException;
+import org.connectme.core.global.exceptions.InternalErrorException;
 import org.connectme.core.userManagement.entities.User;
 import org.connectme.core.userManagement.exceptions.NoSuchUserException;
 import org.connectme.core.userManagement.exceptions.UserDataInsufficientException;

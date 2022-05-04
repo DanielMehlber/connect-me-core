@@ -1,4 +1,4 @@
-package org.connectme.core.globalExceptions;
+package org.connectme.core.global.exceptions;
 
 import org.springframework.http.HttpStatus;
 import org.springframework.web.bind.annotation.ResponseStatus;

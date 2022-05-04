@@ -1,6 +1,6 @@
 package org.connectme.core.tests.userManagement.beans;
 
-import org.connectme.core.globalExceptions.ForbiddenInteractionException;
+import org.connectme.core.global.exceptions.ForbiddenInteractionException;
 import org.connectme.core.tests.userManagement.testUtil.TestUserDataRepository;
 import org.connectme.core.userManagement.UserManagement;
 import org.connectme.core.userManagement.beans.StatefulLoginBean;

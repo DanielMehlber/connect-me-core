@@ -2,7 +2,7 @@ package org.connectme.core.userManagement.impl.jpa;
 
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
-import org.connectme.core.globalExceptions.InternalErrorException;
+import org.connectme.core.global.exceptions.InternalErrorException;
 import org.connectme.core.userManagement.UserManagement;
 import org.connectme.core.userManagement.entities.User;
 import org.connectme.core.userManagement.exceptions.NoSuchUserException;

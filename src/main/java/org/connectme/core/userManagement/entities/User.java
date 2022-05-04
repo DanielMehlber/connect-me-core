@@ -1,6 +1,6 @@
 package org.connectme.core.userManagement.entities;
 
-import org.connectme.core.globalExceptions.InternalErrorException;
+import org.connectme.core.global.exceptions.InternalErrorException;
 import org.hibernate.annotations.CreationTimestamp;
 import org.hibernate.annotations.UpdateTimestamp;
 import org.springframework.data.geo.Point;

@@ -1,7 +1,7 @@
 package org.connectme.core.tests.userManagement.beans;
 
-import org.connectme.core.globalExceptions.ForbiddenInteractionException;
-import org.connectme.core.globalExceptions.InternalErrorException;
+import org.connectme.core.global.exceptions.ForbiddenInteractionException;
+import org.connectme.core.global.exceptions.InternalErrorException;
 import org.connectme.core.tests.userManagement.testUtil.TestUserDataRepository;
 import org.connectme.core.userManagement.beans.StatefulRegistrationBean;
 import org.connectme.core.userManagement.entities.PassedUserData;
@@ -10,7 +10,6 @@ import org.connectme.core.userManagement.impl.jpa.UserRepository;
 import org.connectme.core.userManagement.logic.RegistrationState;
 import org.connectme.core.userManagement.logic.SmsPhoneNumberVerification;
 import org.junit.jupiter.api.Assertions;
-import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
