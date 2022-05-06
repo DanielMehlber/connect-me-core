@@ -2,11 +2,11 @@
     <Appenders>
         <!-- Console appender configuration -->
         <Console name="console" target="SYSTEM_OUT">
-            <PatternLayout pattern="%-6p %d{DEFAULT} [%t] in %c{1}: %m %n%exception" />
+            <PatternLayout pattern="%-6p %d{DEFAULT} [Session:%X{sessionId}] [Request:%X{requestId}] in %c{1}: %m %n%exception" />
         </Console>
         <File name="core-log-file" fileName="logs/core.log">
             <PatternLayout>
-                <Pattern>%-6p %d{DEFAULT} [%t] in %c{1}: %m %n%exception</Pattern>
+                <Pattern>%-6p %d{DEFAULT} [Session:%X{sessionId}] [Request:%X{requestId}] in %c{1}: %m %n%exception</Pattern>
             </PatternLayout>
         </File>
     </Appenders>
