@@ -1,4 +1,4 @@
-package org.connectme.core.tests.userManagement.logic;
+package org.connectme.core.userManagement.logic;
 
 import org.connectme.core.userManagement.exceptions.VerificationAttemptNotAllowedException;
 import org.connectme.core.userManagement.exceptions.WrongVerificationCodeException;

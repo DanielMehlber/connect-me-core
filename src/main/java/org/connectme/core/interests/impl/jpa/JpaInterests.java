@@ -7,10 +7,10 @@ import org.connectme.core.interests.Interests;
 import org.connectme.core.interests.entities.Interest;
 import org.connectme.core.interests.entities.InterestTerm;
 import org.connectme.core.interests.exceptions.NoSuchInterestException;
+import org.connectme.core.interests.exceptions.NoInterestTermsFoundException;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Primary;
 import org.springframework.stereotype.Component;
-import org.springframework.web.util.HtmlUtils;
 
 import java.util.List;
 
@@ -33,7 +33,7 @@ public class JpaInterests implements Interests {
 
     @Override
     public Interest getRootInterestFromTerm(InterestTerm interestTerm) throws NoSuchInterestException, InternalErrorException {
-        Long rootId = interestTerm.getRootId();
+        Long rootId = interestTerm.getRoot().getId();
         Interest root;
         try {
             root = interestRepository.findById(rootId).orElseThrow(() -> new NoSuchInterestException(rootId));
@@ -48,13 +48,22 @@ public class JpaInterests implements Interests {
     }
 
     @Override
-    public String getInterestTermInLanguage(Interest interest, String language) {
-        String term = interest.getTermInLanguage(language);
-        if(term == null) {
-            term = interest.getTermInLanguage("en");
-            log.warn(String.format("term for hobby id:%d '%s' is not available in language '%s'",
-                    interest.getId(), term, HtmlUtils.htmlEscape(language)));
+    public InterestTerm getInterestTermInLanguage(Interest interest, String language) throws NoInterestTermsFoundException {
+        // try to fetch interest terms in language
+        List<InterestTerm> interestTerms = interestTermRepository.getByRootIdInLanguage(interest.getId(), language);
+
+        // if there are no interests terms provided for this language fetch the english terms
+        if(interestTerms.isEmpty()) {
+            log.warn(String.format("term for interest id:%d has been requested for language '%s', but was not provided", interest.getId(), language));
+            interestTerms = interestTermRepository.getByRootIdInLanguage(interest.getId(), "en");
         }
-        return term;
+
+        // if there are still no interests, there are none to be displayed
+        if(interestTerms.isEmpty()) {
+            log.error(String.format("term for interest id:%d is not even provided in english, this should not be", interest.getId()));
+            throw new NoInterestTermsFoundException(interest);
+        }
+
+        return interestTerms.get(0);
     }
 }

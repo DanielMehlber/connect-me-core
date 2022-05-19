@@ -5,9 +5,7 @@ import org.hibernate.annotations.UpdateTimestamp;
 
 import javax.persistence.*;
 import java.time.LocalDateTime;
-import java.util.HashMap;
-import java.util.Map;
-import java.util.Set;
+import java.util.*;
 
 /**
  * This entity contains all data of an interest (incl. different terms in different languages).
@@ -18,43 +16,25 @@ import java.util.Set;
 public class Interest {
 
     @Id @Column(name="id")
+    @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
 
-    /**
-     * contains different languages and their terms for the interest.
-     */
-    private Map<String, String> languageTermsMap;
-
-    @OneToMany
-    public Set<InterestTerm> interestTerms;
-
-    @Column(name = "CREATED_ON")
+    @Column(name = "created_on")
     @CreationTimestamp
     private LocalDateTime createdOn;
 
-    @Column(name = "LAST_UPDATE_ON")
+    @Column(name = "last_update_on")
     @UpdateTimestamp
     private LocalDateTime updatedOn;
 
+    @OneToMany(fetch = FetchType.LAZY, mappedBy = "root")
+    private Set<InterestTerm> terms;
+
     public Interest() {};
 
-    @OneToMany()
-    public void setLanguageTerms(Set<InterestTerm> setLanguageTerms) {
-        languageTermsMap = new HashMap<>();
-        for(InterestTerm languageTerm : setLanguageTerms) {
-            languageTermsMap.put(languageTerm.getLanguageCode(), languageTerm.getTerm());
-        }
-        this.interestTerms = setLanguageTerms;
-    }
-
-    /**
-     * Returns term for interest in requested language. If this language is not provided, it will return the english variant.
-     * @param language preferred language
-     * @return term of interest in language
-     * @author Daniel Mehlber
-     */
-    public String getTermInLanguage(final String language) {
-        return languageTermsMap.getOrDefault(language, null);
+    public Interest(InterestTerm... _terms) {
+        this();
+        terms = new HashSet<>(Arrays.asList(_terms));
     }
 
     public Long getId() {
@@ -65,11 +45,11 @@ public class Interest {
         this.id = id;
     }
 
-    public Set<InterestTerm> getInterestTerms() {
-        return interestTerms;
+    public Set<InterestTerm> getTerms() {
+        return terms;
     }
 
-    public void setInterestTerms(Set<InterestTerm> interestTerms) {
-        this.interestTerms = interestTerms;
+    public void setTerms(Set<InterestTerm> terms) {
+        this.terms = terms;
     }
 }

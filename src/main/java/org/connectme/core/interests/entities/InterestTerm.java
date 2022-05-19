@@ -3,14 +3,16 @@ package org.connectme.core.interests.entities;
 import javax.persistence.*;
 
 @Entity
-@Table(name="interest_language_term")
+@Table(name="interest_term")
 public class InterestTerm {
 
     @Id @Column(name="id")
+    @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
 
-    @Column(name="interest_term")
-    private Long rootId;
+    @ManyToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "interest_id")
+    private Interest root;
 
     @Column(name="lang")
     private String languageCode;
@@ -34,14 +36,6 @@ public class InterestTerm {
         this.id = id;
     }
 
-    public Long getRootId() {
-        return rootId;
-    }
-
-    public void setRootId(Long rootId) {
-        this.rootId = rootId;
-    }
-
     public String getLanguageCode() {
         return languageCode;
     }
@@ -56,5 +50,13 @@ public class InterestTerm {
 
     public void setTerm(String term) {
         this.term = term;
+    }
+
+    public Interest getRoot() {
+        return root;
+    }
+
+    public void setRoot(Interest root) {
+        this.root = root;
     }
 }

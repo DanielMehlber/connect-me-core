@@ -19,6 +19,6 @@ CREATE TABLE interest_term ( -- represent the interest root with in different te
     interest_id BIGINT UNSIGNED, -- actual reference to root interest
     term VARCHAR(30) NOT NULL, -- term for interest in language
     lang VARCHAR(2) NOT NULL, -- language of term
-    CONSTRAINT interest_lang_unique UNIQUE (interestId, lang, term),
-    CONSTRAINT FOREIGN KEY (interestId) REFERENCES interest_root(id) ON DELETE CASCADE
+    CONSTRAINT interest_lang_unique UNIQUE (interest_id, lang, term),
+    CONSTRAINT FOREIGN KEY (interest_id) REFERENCES interest_root(id) ON DELETE CASCADE
 );

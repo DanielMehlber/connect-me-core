@@ -4,6 +4,7 @@ import org.connectme.core.global.exceptions.InternalErrorException;
 import org.connectme.core.interests.entities.Interest;
 import org.connectme.core.interests.entities.InterestTerm;
 import org.connectme.core.interests.exceptions.NoSuchInterestException;
+import org.connectme.core.interests.exceptions.NoInterestTermsFoundException;
 
 import java.util.List;
 
@@ -32,11 +33,12 @@ public interface Interests {
     /**
      * Attempt to find a term for the passed interest in a specific language. If the requested language is not available
      * the english default will be returned.
+     *
      * @param interest root interest
      * @param language
      * @return
      */
-    String getInterestTermInLanguage(final Interest interest, final String language);
+    InterestTerm getInterestTermInLanguage(final Interest interest, final String language) throws NoInterestTermsFoundException;
 
 
 }
