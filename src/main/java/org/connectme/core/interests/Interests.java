@@ -1,9 +1,7 @@
 package org.connectme.core.interests;
 
-import org.connectme.core.global.exceptions.InternalErrorException;
 import org.connectme.core.interests.entities.Interest;
 import org.connectme.core.interests.entities.InterestTerm;
-import org.connectme.core.interests.exceptions.NoSuchInterestException;
 import org.connectme.core.interests.exceptions.NoInterestTermsFoundException;
 
 import java.util.List;

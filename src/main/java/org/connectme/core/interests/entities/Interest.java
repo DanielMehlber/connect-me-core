@@ -30,7 +30,7 @@ public class Interest {
     @OneToMany(fetch = FetchType.LAZY, mappedBy = "root", cascade = CascadeType.ALL, targetEntity = InterestTerm.class)
     private Set<InterestTerm> terms;
 
-    public Interest() {};
+    public Interest() {}
 
     public Long getId() {
         return id;

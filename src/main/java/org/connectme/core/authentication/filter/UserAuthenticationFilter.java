@@ -9,8 +9,6 @@ import org.connectme.core.userManagement.entities.User;
 import org.connectme.core.userManagement.exceptions.FailedAuthenticationException;
 import org.connectme.core.userManagement.exceptions.NoSuchUserException;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.boot.web.servlet.FilterRegistrationBean;
-import org.springframework.context.annotation.Bean;
 import org.springframework.stereotype.Component;
 
 import javax.servlet.*;
@@ -37,7 +35,7 @@ public class UserAuthenticationFilter implements Filter {
      *      <ul>
      *          <li>If the authentication was successful, the user object will be placed in the request attribute "user" and the request can
      *          continue its journey.</li>
-     *          <li>In any other case the request will rebounce and an error code will be returned to the user.</li>
+     *          <li>In any other case the request will bounce off and an error code will be returned to the user.</li>
      *      </ul>
      * </p>
      * <h1>Protected URL patterns</h1>
@@ -69,7 +67,7 @@ public class UserAuthenticationFilter implements Filter {
     public void doFilter(ServletRequest req, ServletResponse resp, FilterChain chain) throws IOException, ServletException {
         HttpServletResponse response = (HttpServletResponse) resp;
         HttpServletRequest request = (HttpServletRequest) req;
-        String jwt = (String) request.getHeader("authentication");
+        String jwt = request.getHeader("authentication");
 
         // check if jwt token is provided
         if(jwt == null) {

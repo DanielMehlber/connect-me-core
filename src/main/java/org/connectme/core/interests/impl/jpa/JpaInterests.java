@@ -2,17 +2,14 @@ package org.connectme.core.interests.impl.jpa;
 
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
-import org.connectme.core.global.exceptions.InternalErrorException;
 import org.connectme.core.interests.Interests;
 import org.connectme.core.interests.entities.Interest;
 import org.connectme.core.interests.entities.InterestTerm;
-import org.connectme.core.interests.exceptions.NoSuchInterestException;
 import org.connectme.core.interests.exceptions.NoInterestTermsFoundException;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Primary;
 import org.springframework.stereotype.Component;
 
-import javax.transaction.Transactional;
 import java.util.List;
 
 @Component

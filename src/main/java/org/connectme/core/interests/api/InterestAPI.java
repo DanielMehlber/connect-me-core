@@ -2,12 +2,9 @@ package org.connectme.core.interests.api;
 
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
-import org.connectme.core.global.exceptions.InternalErrorException;
 import org.connectme.core.interests.Interests;
 import org.connectme.core.interests.entities.InterestTerm;
 import org.connectme.core.authentication.beans.UserAuthenticationBean;
-import org.connectme.core.userManagement.exceptions.FailedAuthenticationException;
-import org.connectme.core.userManagement.exceptions.NoSuchUserException;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.util.HtmlUtils;

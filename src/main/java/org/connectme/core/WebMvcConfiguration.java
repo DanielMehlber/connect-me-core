@@ -6,7 +6,6 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.web.servlet.FilterRegistrationBean;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
-import org.springframework.stereotype.Component;
 import org.springframework.web.servlet.config.annotation.InterceptorRegistry;
 import org.springframework.web.servlet.config.annotation.WebMvcConfigurer;
 
@@ -26,7 +25,7 @@ public class WebMvcConfiguration implements WebMvcConfigurer {
 
     @Bean
     public FilterRegistrationBean<UserAuthenticationFilter> addAuthenticationFilter() {
-        FilterRegistrationBean<UserAuthenticationFilter> registration = new FilterRegistrationBean();
+        FilterRegistrationBean<UserAuthenticationFilter> registration = new FilterRegistrationBean<>();
         registration.setFilter(userAuthenticationFilter);
         // add url patterns for authentication
         registration.addUrlPatterns("/interests/*");

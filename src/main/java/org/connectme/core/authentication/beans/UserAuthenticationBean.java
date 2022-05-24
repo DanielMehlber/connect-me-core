@@ -51,6 +51,7 @@ public class UserAuthenticationBean {
      */
     private final Map<String, String> loggedInUsersCache = new HashMap<>();
 
+    @SuppressWarnings("SpellCheckingInspection")
     private static final String SECRET = "6a8c00720cbcbd95e3acc3c5a04345ed";
 
     /**

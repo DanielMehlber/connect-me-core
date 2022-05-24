@@ -55,22 +55,14 @@ public class InterestAPITest {
     private UserManagement userManagement;
 
     private String currentJWT;
+
     private User currentUser;
-
-    @Autowired
-    private WebApplicationContext context;
-
-    @Autowired
-    private UserAuthenticationFilter userAuthenticationFilter;
 
     @Autowired
     private MockMvc client;
 
     @BeforeEach
     private void prepare() throws Exception {
-        // create MockMvc with filters
-        // client = MockMvcBuilders.webAppContextSetup(context).addFilter(userAuthenticationFilter).build();
-
         // fill repository
         interestRepository.deleteAll();
         interestTermRepository.deleteAll();
@@ -83,6 +75,11 @@ public class InterestAPITest {
         currentJWT = authenticationBean.login(currentUser);
     }
 
+    /**
+     * searches for interest terms by their string value. The user will do this in order to add or search for
+     * interests.
+     * @throws Exception unit test failed
+     */
     @Test
     public void searchTerms() throws Exception {
         // -- arrange --
@@ -99,13 +96,18 @@ public class InterestAPITest {
         }
     }
 
+    /**
+     * The access to the interest api is restricted. Every path to /interests/* must be protected by the {@link UserAuthenticationFilter}.
+     * When there is no logged-in user or a JWT is not provided access should be forbidden.
+     * @throws Exception unit test failed
+     */
     @Test
     public void attemptUnauthorizedAccess() throws Exception {
         // -- arrange --
         authenticationBean.logout(currentUser);
 
         // -- act --
-        // try to access anything in path /interests/**
+        // try to access anything in path /interests/*
         client.perform(get("/interests/something")).andExpect(status().isUnauthorized());
         // -- assert --
     }
