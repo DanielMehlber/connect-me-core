@@ -1,5 +1,6 @@
 package org.connectme.core.userManagement.beans;
 
+import org.connectme.core.authentication.beans.UserAuthenticationBean;
 import org.connectme.core.global.exceptions.InternalErrorException;
 import org.connectme.core.userManagement.testUtil.TestUserDataRepository;
 import org.connectme.core.userManagement.UserManagement;

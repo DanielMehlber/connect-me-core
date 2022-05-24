@@ -1,15 +1,27 @@
 package org.connectme.core.interests;
 
+import org.apache.logging.log4j.core.config.plugins.util.ResolverUtil;
+import org.connectme.core.authentication.beans.UserAuthenticationBean;
+import org.connectme.core.interests.entities.Interest;
 import org.connectme.core.interests.entities.InterestTerm;
 import org.connectme.core.interests.impl.jpa.InterestRepository;
+import org.connectme.core.interests.impl.jpa.InterestTermRepository;
 import org.connectme.core.interests.testUtil.TestInterestData;
+import org.connectme.core.userManagement.UserManagement;
+import org.connectme.core.userManagement.entities.User;
+import org.connectme.core.userManagement.impl.jpa.UserRepository;
+import org.connectme.core.userManagement.testUtil.TestUserDataRepository;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
+import org.springframework.mock.web.MockHttpSession;
+import org.springframework.test.annotation.Rollback;
 
+import javax.transaction.Transactional;
 import java.util.List;
+import java.util.Set;
 
 @SpringBootTest
 public class InterestsTests {
@@ -20,16 +32,30 @@ public class InterestsTests {
     @Autowired
     private InterestRepository interestRepository;
 
+    @Autowired
+    private InterestTermRepository interestTermRepository;
+
+    @Autowired
+    private UserManagement userManagement;
+
     @BeforeEach
-    private void prepare() {
+    private void prepare() throws Exception {
+        // fill repository
         interestRepository.deleteAll();
+        interestTermRepository.deleteAll();
+        TestInterestData.fillRepository(interestRepository);
     }
 
+    /**
+     * Interest terms can be searched by their content. Search a term by its value and assert that the same interest
+     * term was returned.
+     * @throws Exception test failed
+     * @author Daniel Mehlber
+     */
     @Test
     public void searchInterestTerms() throws Exception {
         // -- arrange --
-        TestInterestData.fillRepository(interestRepository);
-        final InterestTerm interestTerm = TestInterestData.getRandomInterestTerm();
+        final InterestTerm interestTerm = TestInterestData.getRandomInterestTerm(interestTermRepository);
         final String term = interestTerm.getTerm();
 
         // -- act --
@@ -41,5 +67,51 @@ public class InterestsTests {
             Assertions.assertTrue(strTern.contains(term));
         }
     }
+
+    /**
+     * An interest provides multiple terms in various languages. Request a certain term in a certain language and
+     * assert the returned language.
+     * @throws Exception test failed
+     * @author Daniel Mehlber
+     */
+    @Test
+    public void getInterestTermInLanguage_termProvided() throws Exception {
+        InterestTerm randomTerm = TestInterestData.getRandomInterestTerm(interestTermRepository);
+        String languageCode = randomTerm.getLanguageCode();
+
+        Interest root = randomTerm.getRoot();
+
+        // get term of language
+        InterestTerm term = interestManagement.getInterestTermInLanguage(root, languageCode);
+
+        // assert that this is the same term
+        Assertions.assertEquals(languageCode, randomTerm.getLanguageCode());
+    }
+
+    /**
+     * If an interest does not provide an interest term in the requested language it will return the english (international)
+     * version. Check if this behavior works, by requesting a non-existent language and expect english term.
+     * @throws Exception test failed
+     * @author Daniel Mehlber
+     */
+    @Test
+    public void getInterestTermInLanguage_termNotProvided() throws Exception {
+        // -- arrange --
+        Interest interest = TestInterestData.getRandomInterest(interestRepository);
+
+        Set<InterestTerm> terms = interest.getTerms();
+
+        // -- act --
+        // get interest term in language code, that certainly does not exist
+        InterestTerm englishTerm = interestManagement.getInterestTermInLanguage(interest, "xx");
+        //                                                  This language certainly does not exist ^^^^
+
+        // -- assert --
+        // assert that default phrase in english
+        Assertions.assertEquals("en", englishTerm.getLanguageCode());
+    }
+
+    // TODO match different interest terms of the same interest root
+    // TODO dont match different interests terms of different interest roots
 
 }

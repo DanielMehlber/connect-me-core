@@ -27,22 +27,13 @@ public class Interest {
     @UpdateTimestamp
     private LocalDateTime updatedOn;
 
-    @OneToMany(fetch = FetchType.LAZY, mappedBy = "root")
+    @OneToMany(fetch = FetchType.LAZY, mappedBy = "root", cascade = CascadeType.ALL, targetEntity = InterestTerm.class)
     private Set<InterestTerm> terms;
 
     public Interest() {};
 
-    public Interest(InterestTerm... _terms) {
-        this();
-        terms = new HashSet<>(Arrays.asList(_terms));
-    }
-
     public Long getId() {
         return id;
-    }
-
-    public void setId(Long id) {
-        this.id = id;
     }
 
     public Set<InterestTerm> getTerms() {
@@ -50,6 +41,14 @@ public class Interest {
     }
 
     public void setTerms(Set<InterestTerm> terms) {
+        // this is a bidirectional relationship, so set the new parent
+        for(InterestTerm term : terms) {
+            term.setRoot(this);
+        }
         this.terms = terms;
+    }
+
+    public void setTerms(InterestTerm... terms) {
+        setTerms(new HashSet<>(Arrays.asList(terms)));
     }
 }

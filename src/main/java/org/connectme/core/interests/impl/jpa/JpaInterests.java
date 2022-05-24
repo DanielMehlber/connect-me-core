@@ -12,6 +12,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Primary;
 import org.springframework.stereotype.Component;
 
+import javax.transaction.Transactional;
 import java.util.List;
 
 @Component
@@ -29,22 +30,6 @@ public class JpaInterests implements Interests {
     @Override
     public List<InterestTerm> searchInterestTerms(String term) {
         return interestTermRepository.searchByTerm(term);
-    }
-
-    @Override
-    public Interest getRootInterestFromTerm(InterestTerm interestTerm) throws NoSuchInterestException, InternalErrorException {
-        Long rootId = interestTerm.getRoot().getId();
-        Interest root;
-        try {
-            root = interestRepository.findById(rootId).orElseThrow(() -> new NoSuchInterestException(rootId));
-        } catch (final RuntimeException e) {
-            // CASE: some internal error occurred
-            log.error(String.format("cannot load interest root id:%d from interest term id:%d '%s' due to an internal error: %s",
-                    rootId, interestTerm.getId(), interestTerm.getTerm(), e.getMessage()));
-            throw new InternalErrorException("cannot load root interest from interest term", e);
-        }
-
-        return root;
     }
 
     @Override

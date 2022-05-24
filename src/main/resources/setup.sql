@@ -16,7 +16,7 @@ CREATE TABLE interest_root ( -- represents a single interest
 
 CREATE TABLE interest_term ( -- represent the interest root with in different terms or languages
     id SERIAL PRIMARY KEY, -- id language term for interest
-    interest_id BIGINT UNSIGNED, -- actual reference to root interest
+    interest_id BIGINT UNSIGNED NOT NULL, -- actual reference to root interest
     term VARCHAR(30) NOT NULL, -- term for interest in language
     lang VARCHAR(2) NOT NULL, -- language of term
     CONSTRAINT interest_lang_unique UNIQUE (interest_id, lang, term),

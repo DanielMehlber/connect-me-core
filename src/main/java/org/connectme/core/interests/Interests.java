@@ -21,24 +21,14 @@ public interface Interests {
      */
     List<InterestTerm> searchInterestTerms(final String term);
 
-    /**
-     * Determine root interest of interest term.
-     * @param interestTerm term for the searched interest
-     * @return root interest of passed interestTerm
-     * @throws NoSuchInterestException cannot find interest
-     * @throws InternalErrorException an unexpected internal error occurred
-     */
-    Interest getRootInterestFromTerm(final InterestTerm interestTerm) throws NoSuchInterestException, InternalErrorException;
 
     /**
      * Attempt to find a term for the passed interest in a specific language. If the requested language is not available
      * the english default will be returned.
      *
      * @param interest root interest
-     * @param language
-     * @return
+     * @param language language code
+     * @return term for interest in preferred language
      */
     InterestTerm getInterestTermInLanguage(final Interest interest, final String language) throws NoInterestTermsFoundException;
-
-
 }
