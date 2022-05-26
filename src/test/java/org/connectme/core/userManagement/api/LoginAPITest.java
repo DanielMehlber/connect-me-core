@@ -1,15 +1,15 @@
 package org.connectme.core.userManagement.api;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
-import org.connectme.core.userManagement.testUtil.TestUserDataRepository;
+import org.connectme.core.authentication.beans.UserAuthenticationBean;
 import org.connectme.core.userManagement.UserManagement;
 import org.connectme.core.userManagement.beans.StatefulLoginBean;
-import org.connectme.core.authentication.beans.UserAuthenticationBean;
 import org.connectme.core.userManagement.entities.PassedLoginData;
 import org.connectme.core.userManagement.entities.PassedUserData;
 import org.connectme.core.userManagement.entities.User;
 import org.connectme.core.userManagement.impl.jpa.UserRepository;
 import org.connectme.core.userManagement.logic.SmsPhoneNumberVerification;
+import org.connectme.core.userManagement.testUtil.TestUserDataRepository;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;

@@ -2,11 +2,11 @@ package org.connectme.core.interests.api;
 
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
+import org.connectme.core.authentication.beans.UserAuthenticationBean;
 import org.connectme.core.authentication.filter.UserAuthenticationFilter;
 import org.connectme.core.interests.Interests;
 import org.connectme.core.interests.entities.Interest;
 import org.connectme.core.interests.entities.InterestTerm;
-import org.connectme.core.authentication.beans.UserAuthenticationBean;
 import org.connectme.core.interests.exceptions.NoInterestTermsFoundException;
 import org.connectme.core.interests.exceptions.NoSuchInterestException;
 import org.connectme.core.interests.impl.jpa.InterestRepository;

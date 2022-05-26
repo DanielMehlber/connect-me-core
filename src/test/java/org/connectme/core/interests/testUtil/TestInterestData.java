@@ -5,8 +5,9 @@ import org.connectme.core.interests.entities.InterestTerm;
 import org.connectme.core.interests.impl.jpa.InterestRepository;
 import org.connectme.core.interests.impl.jpa.InterestTermRepository;
 
-import javax.transaction.Transactional;
-import java.util.*;
+import java.util.LinkedList;
+import java.util.List;
+import java.util.Random;
 
 public class TestInterestData {
 

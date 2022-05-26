@@ -2,10 +2,8 @@ package org.connectme.core.interests.api;
 
 import com.fasterxml.jackson.core.type.TypeReference;
 import com.fasterxml.jackson.databind.ObjectMapper;
-import org.aspectj.lang.annotation.Before;
 import org.connectme.core.authentication.beans.UserAuthenticationBean;
 import org.connectme.core.authentication.filter.UserAuthenticationFilter;
-import org.connectme.core.global.exceptions.InternalErrorException;
 import org.connectme.core.interests.entities.Interest;
 import org.connectme.core.interests.entities.InterestTerm;
 import org.connectme.core.interests.impl.jpa.InterestRepository;
@@ -13,8 +11,6 @@ import org.connectme.core.interests.impl.jpa.InterestTermRepository;
 import org.connectme.core.interests.testUtil.TestInterestData;
 import org.connectme.core.userManagement.UserManagement;
 import org.connectme.core.userManagement.entities.User;
-import org.connectme.core.userManagement.exceptions.NoSuchUserException;
-import org.connectme.core.userManagement.exceptions.UserDataInsufficientException;
 import org.connectme.core.userManagement.impl.jpa.UserRepository;
 import org.connectme.core.userManagement.testUtil.TestUserDataRepository;
 import org.junit.jupiter.api.Assertions;
@@ -23,13 +19,7 @@ import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureMockMvc;
 import org.springframework.boot.test.context.SpringBootTest;
-import org.springframework.http.HttpStatus;
 import org.springframework.test.web.servlet.MockMvc;
-import org.springframework.test.web.servlet.MockMvcBuilder;
-import org.springframework.test.web.servlet.request.MockMvcRequestBuilders;
-import org.springframework.test.web.servlet.result.MockMvcResultMatchers;
-import org.springframework.test.web.servlet.setup.MockMvcBuilders;
-import org.springframework.web.context.WebApplicationContext;
 
 import java.util.List;
 
