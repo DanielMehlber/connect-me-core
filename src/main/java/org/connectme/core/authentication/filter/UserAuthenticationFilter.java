@@ -24,6 +24,8 @@ import java.io.IOException;
 @Component
 public class UserAuthenticationFilter implements Filter {
 
+    public static final String HTTP_ATTR_USER = "user";
+
     private final Logger log = LogManager.getLogger(UserAuthenticationFilter.class);
 
     @Autowired
@@ -71,6 +73,7 @@ public class UserAuthenticationFilter implements Filter {
 
         // check if jwt token is provided
         if(jwt == null) {
+            log.warn("access was requested, but no jwt token was provided. Request was rejected.");
             // no jwt was provided. cannot continue authentication
             response.sendError(HttpServletResponse.SC_UNAUTHORIZED);
             response.getWriter().println("no jwt provided");
@@ -92,7 +95,7 @@ public class UserAuthenticationFilter implements Filter {
         }
 
         // place authenticated user in request and continue
-        request.setAttribute("user", authenticatedUser);
+        request.setAttribute(HTTP_ATTR_USER, authenticatedUser);
         chain.doFilter(request, response);
     }
 

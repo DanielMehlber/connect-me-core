@@ -6,6 +6,7 @@ import org.aspectj.lang.annotation.Before;
 import org.connectme.core.authentication.beans.UserAuthenticationBean;
 import org.connectme.core.authentication.filter.UserAuthenticationFilter;
 import org.connectme.core.global.exceptions.InternalErrorException;
+import org.connectme.core.interests.entities.Interest;
 import org.connectme.core.interests.entities.InterestTerm;
 import org.connectme.core.interests.impl.jpa.InterestRepository;
 import org.connectme.core.interests.impl.jpa.InterestTermRepository;
@@ -79,6 +80,7 @@ public class InterestAPITest {
      * searches for interest terms by their string value. The user will do this in order to add or search for
      * interests.
      * @throws Exception unit test failed
+     * @author Daniel Mehlber
      */
     @Test
     public void searchTerms() throws Exception {
@@ -97,9 +99,65 @@ public class InterestAPITest {
     }
 
     /**
+     * The API should return a term of an interest in the requested language.
+     * In this scenario, the requested language is provided and can be fetched without problems
+     * @throws Exception unit test failed
+     * @author Daniel Mehlber
+     */
+    @Test
+    public void getTermOfInterestInLanguage_languageProvided() throws Exception {
+        // -- arrange --
+        // add custom interest
+        Interest something = new Interest();
+        something.setTerms(
+                new InterestTerm(something, "something", "en"),
+                new InterestTerm(something, "irgendetwas", "de")
+        );
+        something = interestRepository.save(something);
+
+        // -- act --
+        String json = client.perform(get("/interests/"+something.getId()+"/de").header("authentication", currentJWT))
+                .andExpect(status().isOk()).andReturn().getResponse().getContentAsString();
+
+        // -- assert --
+        InterestTerm fetchedTerm = new ObjectMapper().readValue(json, InterestTerm.class);
+        Assertions.assertEquals("irgendetwas", fetchedTerm.getTerm());
+        Assertions.assertEquals("de", fetchedTerm.getLanguageCode());
+    }
+
+    /**
+     * The API should return a term of an interest in the requested language.
+     * In this scenario, the requested language is not provided. In this case the international default is
+     * expected ('en').
+     * @throws Exception unit test failed
+     * @author Daniel Mehlber
+     */
+    @Test
+    public void getTermOfInterestInLanguage_languageNotProvided() throws Exception {
+        // -- arrange --
+        // add custom interest
+        Interest something = new Interest();
+        something.setTerms(
+                new InterestTerm(something, "something", "en"),
+                new InterestTerm(something, "irgendetwas", "de")
+        );
+        something = interestRepository.save(something);
+
+        // -- act --
+        String json = client.perform(get("/interests/"+something.getId()+"/ch").header("authentication", currentJWT))
+                .andExpect(status().isOk()).andReturn().getResponse().getContentAsString();
+
+        // -- assert --
+        InterestTerm fetchedTerm = new ObjectMapper().readValue(json, InterestTerm.class);
+        Assertions.assertEquals("something", fetchedTerm.getTerm());
+        Assertions.assertEquals("en", fetchedTerm.getLanguageCode());
+    }
+
+    /**
      * The access to the interest api is restricted. Every path to /interests/* must be protected by the {@link UserAuthenticationFilter}.
      * When there is no logged-in user or a JWT is not provided access should be forbidden.
      * @throws Exception unit test failed
+     * @author Daniel Mehlber
      */
     @Test
     public void attemptUnauthorizedAccess() throws Exception {
