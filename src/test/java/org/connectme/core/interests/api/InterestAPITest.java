@@ -25,6 +25,7 @@ import java.nio.charset.StandardCharsets;
 import java.util.List;
 
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
+import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.content;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
 @SpringBootTest
@@ -143,6 +144,46 @@ public class InterestAPITest {
         InterestTerm fetchedTerm = new ObjectMapper().readValue(json, InterestTerm.class);
         Assertions.assertEquals("something", fetchedTerm.getTerm());
         Assertions.assertEquals("en", fetchedTerm.getLanguageCode());
+    }
+
+    /**
+     * If the user tries to request a term for an interest that does not exist (id is not known)
+     * the API should return HTTP Status "NO CONTENT"
+     * @throws Exception the unit test failed
+     */
+    @Test
+    public void getTermOfInterestInLanguage_interestDoesNotExist() throws Exception {
+        // -- arrange --
+        // search interest id that does not exist
+        long interestId = 100;
+        do {
+            interestId++;
+        } while (interestRepository.existsById(interestId));
+        // -- act and assert --
+        // try to fetch interest term for non-existing interest
+        client.perform(get("/interests/"+interestId+"/en").header("authentication", currentJWT))
+                .andExpect(status().isNoContent());
+    }
+
+    /**
+     * In case the user requests an interest term in a language that is provided and the english default
+     * for this interest is not set the API should return HTTP status "NO CONTENT"
+     * @throws Exception unit test failed.
+     */
+    @Test
+    public void getTermOfInterestInLanguage_noTermFound() throws Exception {
+        // -- arrange --
+        // add custom interest with no english default provided
+        Interest something = new Interest();
+        something.setTerms(
+                new InterestTerm(something, "任何事物", "ch"),
+                new InterestTerm(something, "irgendetwas", "de")
+        );
+        something = interestRepository.save(something);
+
+        // -- act and assert --
+        client.perform(get("/interests/"+something.getId()+"/xx").header("authentication", currentJWT))
+                .andExpect(status().isNoContent());
     }
 
     /**
