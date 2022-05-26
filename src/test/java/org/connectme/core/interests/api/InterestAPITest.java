@@ -21,6 +21,7 @@ import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureMock
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.test.web.servlet.MockMvc;
 
+import java.nio.charset.StandardCharsets;
 import java.util.List;
 
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
@@ -79,7 +80,7 @@ public class InterestAPITest {
 
         // -- act --
         String jsonResult = client.perform(get("/interests/search/term").param("term", term.getTerm()).contentType("text/plain").header("authentication", currentJWT))
-                .andExpect(status().isOk()).andReturn().getResponse().getContentAsString();
+                .andExpect(status().isOk()).andReturn().getResponse().getContentAsString(StandardCharsets.UTF_8);
 
         // -- assert
         List<InterestTerm> interestTerms = new ObjectMapper().readValue(jsonResult, new TypeReference<List<InterestTerm>>() {});
@@ -101,18 +102,19 @@ public class InterestAPITest {
         Interest something = new Interest();
         something.setTerms(
                 new InterestTerm(something, "something", "en"),
-                new InterestTerm(something, "irgendetwas", "de")
+                new InterestTerm(something, "任何事物", "ch")
         );
         something = interestRepository.save(something);
 
         // -- act --
-        String json = client.perform(get("/interests/"+something.getId()+"/de").header("authentication", currentJWT))
-                .andExpect(status().isOk()).andReturn().getResponse().getContentAsString();
+        String json = client.perform(get("/interests/"+something.getId()+"/ch").header("authentication", currentJWT))
+                .andExpect(status().isOk()).andReturn().getResponse().getContentAsString(StandardCharsets.UTF_8);
 
         // -- assert --
         InterestTerm fetchedTerm = new ObjectMapper().readValue(json, InterestTerm.class);
-        Assertions.assertEquals("irgendetwas", fetchedTerm.getTerm());
-        Assertions.assertEquals("de", fetchedTerm.getLanguageCode());
+        // also checking database UTF-8 here
+        Assertions.assertEquals("任何事物", fetchedTerm.getTerm());
+        Assertions.assertEquals("ch", fetchedTerm.getLanguageCode());
     }
 
     /**
@@ -135,7 +137,7 @@ public class InterestAPITest {
 
         // -- act --
         String json = client.perform(get("/interests/"+something.getId()+"/ch").header("authentication", currentJWT))
-                .andExpect(status().isOk()).andReturn().getResponse().getContentAsString();
+                .andExpect(status().isOk()).andReturn().getResponse().getContentAsString(StandardCharsets.UTF_8);
 
         // -- assert --
         InterestTerm fetchedTerm = new ObjectMapper().readValue(json, InterestTerm.class);

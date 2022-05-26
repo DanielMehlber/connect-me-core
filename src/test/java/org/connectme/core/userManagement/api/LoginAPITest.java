@@ -19,6 +19,7 @@ import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.mock.web.MockHttpSession;
 import org.springframework.test.web.servlet.MockMvc;
 
+import java.nio.charset.StandardCharsets;
 import java.time.LocalDateTime;
 
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
@@ -79,7 +80,7 @@ public class LoginAPITest {
         String code = bean.getPhoneNumberVerification().getVerificationCode();
 
         String jwt = client.perform(post("/users/login/verify/check").session(session).contentType("text/plain").content(code))
-                .andExpect(status().isOk()).andReturn().getResponse().getContentAsString();
+                .andExpect(status().isOk()).andReturn().getResponse().getContentAsString(StandardCharsets.UTF_8);
 
         return jwt;
     }
