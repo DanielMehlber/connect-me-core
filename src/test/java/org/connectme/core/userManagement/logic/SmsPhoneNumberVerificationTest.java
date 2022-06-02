@@ -37,7 +37,7 @@ public class SmsPhoneNumberVerificationTest {
 
         // -- act and assert --
         Assertions.assertFalse(verification.isVerificationAttemptCurrentlyAllowed());
-        Assertions.assertThrows(VerificationAttemptNotAllowedException.class, () -> verification.startVerificationAttempt());
+        Assertions.assertThrows(VerificationAttemptNotAllowedException.class, verification::startVerificationAttempt);
         Assertions.assertFalse(verification.isVerified());
         // skip waiting time
         verification.setLastVerificationAttempt(LocalDateTime.now().minusMinutes(SmsPhoneNumberVerification.BLOCK_FAILED_ATTEMPT_MINUTES));
@@ -63,12 +63,12 @@ public class SmsPhoneNumberVerificationTest {
         // another verification attempt is not allowed while another verification is pending
         Assertions.assertTrue(verification.isPendingVerificationAttempt());
         Assertions.assertFalse(verification.isVerificationAttemptCurrentlyAllowed());
-        Assertions.assertThrows(VerificationAttemptNotAllowedException.class, () -> verification.startVerificationAttempt());
+        Assertions.assertThrows(VerificationAttemptNotAllowedException.class, verification::startVerificationAttempt);
 
         // skip verification attempt duration and assert that another attempt is free now
         verification.setLastVerificationAttempt(LocalDateTime.now().minusMinutes(SmsPhoneNumberVerification.VERIFICATION_ATTEMPT_PENDING_DURATION_MINUTES));
         Assertions.assertFalse(verification.isPendingVerificationAttempt());
         Assertions.assertTrue(verification.isVerificationAttemptCurrentlyAllowed());
-        Assertions.assertDoesNotThrow(() -> verification.startVerificationAttempt());
+        Assertions.assertDoesNotThrow(verification::startVerificationAttempt);
     }
 }

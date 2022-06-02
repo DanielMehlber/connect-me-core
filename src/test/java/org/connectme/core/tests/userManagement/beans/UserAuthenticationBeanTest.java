@@ -1,12 +1,12 @@
 package org.connectme.core.tests.userManagement.beans;
 
+import org.connectme.core.authentication.beans.UserAuthenticationBean;
 import org.connectme.core.global.exceptions.InternalErrorException;
 import org.connectme.core.tests.userManagement.testUtil.TestUserDataRepository;
 import org.connectme.core.userManagement.UserManagement;
-import org.connectme.core.userManagement.beans.UserAuthenticationBean;
 import org.connectme.core.userManagement.entities.PassedUserData;
 import org.connectme.core.userManagement.entities.User;
-import org.connectme.core.userManagement.exceptions.FailedAuthenticationException;
+import org.connectme.core.authentication.exception.FailedAuthenticationException;
 import org.connectme.core.userManagement.exceptions.NoSuchUserException;
 import org.connectme.core.userManagement.exceptions.UserDataInsufficientException;
 import org.connectme.core.userManagement.exceptions.UsernameAlreadyTakenException;

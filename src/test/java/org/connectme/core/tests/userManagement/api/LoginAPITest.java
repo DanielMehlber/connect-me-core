@@ -1,11 +1,11 @@
 package org.connectme.core.tests.userManagement.api;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
+import org.connectme.core.authentication.beans.UserAuthenticationBean;
 import org.connectme.core.tests.userManagement.testUtil.TestUserDataRepository;
 import org.connectme.core.userManagement.UserManagement;
 import org.connectme.core.userManagement.api.LoginAPI;
 import org.connectme.core.userManagement.beans.StatefulLoginBean;
-import org.connectme.core.userManagement.beans.UserAuthenticationBean;
 import org.connectme.core.userManagement.entities.PassedLoginData;
 import org.connectme.core.userManagement.entities.PassedUserData;
 import org.connectme.core.userManagement.entities.User;
@@ -79,15 +79,11 @@ public class LoginAPITest {
 
         String code = bean.getPhoneNumberVerification().getVerificationCode();
 
-        String jwt = client.perform(post("/users/login/verify/check").session(session).contentType("text/plain").content(code))
+        return client.perform(post("/users/login/verify/check").session(session).contentType("text/plain").content(code))
                 .andExpect(status().isOk()).andReturn().getResponse().getContentAsString();
-
-        return jwt;
     }
 
     private void exceedVerificationAttempts(MockHttpSession session) throws Exception {
-        // extract verification code and pass it to API
-        StatefulLoginBean bean = extractLoginBeanFromSession(session);
 
         for(int i = 0; i < SmsPhoneNumberVerification.MAX_AMOUNT_VERIFICATION_ATTEMPTS; i++) {
             // 3.1) start verification process

@@ -79,15 +79,11 @@ public class LoginAPITest {
 
         String code = bean.getPhoneNumberVerification().getVerificationCode();
 
-        String jwt = client.perform(post("/users/login/verify/check").session(session).contentType("text/plain").content(code))
+        return client.perform(post("/users/login/verify/check").session(session).contentType("text/plain").content(code))
                 .andExpect(status().isOk()).andReturn().getResponse().getContentAsString(StandardCharsets.UTF_8);
-
-        return jwt;
     }
 
     private void exceedVerificationAttempts(MockHttpSession session) throws Exception {
-        // extract verification code and pass it to API
-        StatefulLoginBean bean = extractLoginBeanFromSession(session);
 
         for(int i = 0; i < SmsPhoneNumberVerification.MAX_AMOUNT_VERIFICATION_ATTEMPTS; i++) {
             // 3.1) start verification process

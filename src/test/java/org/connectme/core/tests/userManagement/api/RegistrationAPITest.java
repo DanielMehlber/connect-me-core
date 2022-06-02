@@ -254,8 +254,6 @@ public class RegistrationAPITest {
                         .session(session))
                 .andExpect(status().isOk());
 
-        StatefulRegistrationBean statefulRegistrationBean = extractRegistrationBeanFromSession(session);
-
         // 3) exceed the maximum amount of verification attempts
         for(int i = 0; i < SmsPhoneNumberVerification.MAX_AMOUNT_VERIFICATION_ATTEMPTS; i++) {
             // 3.1) start verification process
