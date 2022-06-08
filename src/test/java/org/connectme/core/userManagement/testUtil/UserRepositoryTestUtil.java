@@ -140,7 +140,7 @@ public class UserRepositoryTestUtil {
                 UserRepositoryTestUtil.Usernames.getRandomAllowed(),
                 UserRepositoryTestUtil.Passwords.getRandomAllowed(),
                 UserRepositoryTestUtil.PhoneNumbers.getRandomAllowed(),
-                InterestRepositoryTestUtil.getFiveRandomInterestTermIds(interestTermRepository));
+                InterestRepositoryTestUtil.getRandomInterestTermIds(interestTermRepository, 5));
     }
 
     public static PassedUserData assembleForbiddenPassedUserData(InterestTermRepository interestTermRepository) {
@@ -148,7 +148,7 @@ public class UserRepositoryTestUtil {
                 UserRepositoryTestUtil.Usernames.getRandomForbidden(),
                 UserRepositoryTestUtil.Passwords.getRandomForbidden(),
                 UserRepositoryTestUtil.PhoneNumbers.getRandomForbidden(),
-                InterestRepositoryTestUtil.getFiveRandomInterestTermIds(interestTermRepository));
+                InterestRepositoryTestUtil.getRandomInterestTermIds(interestTermRepository, 5));
     }
 
 }

@@ -115,7 +115,7 @@ public class RegistrationAPITest {
 
         User createdUser = userManagement.fetchUserByUsername(userData.getUsername());
         User expectedUser = userFactoryBean.build(userData);
-        Assertions.assertEquals(expectedUser, createdUser);
+        Assertions.assertEquals(expectedUser.getInterestTerms(), expectedUser.getInterestTerms());
     }
 
     /**

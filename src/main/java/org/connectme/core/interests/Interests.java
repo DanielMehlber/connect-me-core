@@ -37,6 +37,7 @@ public interface Interests {
      * @param id id of interest term
      * @return interest term entity
      * @throws NoSuchInterestTermException no interest term with passed id found in data storage
+     * @throws InternalErrorException database error; runtime error
      */
     InterestTerm fetchInterestTerm(final Long id) throws NoSuchInterestTermException, InternalErrorException;
 }

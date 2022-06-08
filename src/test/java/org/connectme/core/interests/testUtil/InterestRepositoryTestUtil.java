@@ -97,7 +97,7 @@ public class InterestRepositoryTestUtil {
         interestRepository.deleteAll();
     }
 
-    public static Set<InterestTerm> getFiveRandomInterestTerms(InterestTermRepository interestTermRepository) {
+    public static Set<InterestTerm> getRandomInterestTerms(InterestTermRepository interestTermRepository, int amount) {
         // check if there are at least 5 interest terms in this repository
         if(interestTermRepository.count() < 5)
             throw new EmptyInterestRepositoryException();
@@ -105,12 +105,12 @@ public class InterestRepositoryTestUtil {
         Set<InterestTerm> interestTerms = new HashSet<>();
         do  {
             interestTerms.add(getRandomInterestTerm(interestTermRepository));
-        } while (interestTerms.size() < 5);
+        } while (interestTerms.size() < amount);
 
         return interestTerms;
     }
 
-    public static Set<Long> getFiveRandomInterestTermIds(InterestTermRepository interestTermRepository) {
-        return getFiveRandomInterestTerms(interestTermRepository).stream().map(InterestTerm::getId).collect(Collectors.toSet());
+    public static Set<Long> getRandomInterestTermIds(InterestTermRepository interestTermRepository, int amount) {
+        return getRandomInterestTerms(interestTermRepository, amount).stream().map(InterestTerm::getId).collect(Collectors.toSet());
     }
 }
